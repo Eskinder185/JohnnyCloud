@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import JohnnyBot from '@/components/animation/JohnnyBot';
+import RetroRobot from '@/components/ui/RetroRobot';
 
 interface Message {
   id: string;
@@ -98,7 +98,7 @@ export default function AWSChatBot() {
   return (
     <Card className="p-8 min-h-[500px] flex flex-col">
       <div className="text-center mb-6">
-        <JohnnyBot className="mx-auto mb-4" />
+        <RetroRobot className="mx-auto mb-4 w-24 h-24" />
         <h3 className="text-xl font-semibold mb-2">How can I help?</h3>
         <p className="text-jc-dim text-sm">
           Ask me anything about your AWS infrastructure
