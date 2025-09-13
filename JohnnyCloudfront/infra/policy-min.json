@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Effect": "Allow", "Action": [
+      "ce:GetCostAndUsage","ce:GetCostForecast",
+      "ce:GetAnomalies","ce:ListAnomalies","ce:ListAnomalyMonitors","ce:ListAnomalySubscriptions",
+      "ce:GetSavingsPlansUtilization","ce:GetSavingsPlansCoverage",
+      "ce:GetReservationUtilization","ce:GetReservationCoverage"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "budgets:DescribeBudgets","budgets:DescribeBudgetPerformanceHistory"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "guardduty:ListDetectors","guardduty:ListFindings","guardduty:GetFindings"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "securityhub:GetFindings","securityhub:DescribeStandards","securityhub:GetEnabledStandards"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "config:GetComplianceSummaryByConfigRule"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "iam:ListUsers","iam:ListMFADevices","iam:ListAccessKeys","iam:GetAccessKeyLastUsed","iam:GetAccountPasswordPolicy"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "ec2:DescribeSecurityGroups"
+    ], "Resource": "*" },
+    { "Effect": "Allow", "Action": [
+      "s3:ListAllMyBuckets","s3:GetPublicAccessBlock","s3:GetBucketPolicyStatus"
+    ], "Resource": "*" }
+  ]
+}
