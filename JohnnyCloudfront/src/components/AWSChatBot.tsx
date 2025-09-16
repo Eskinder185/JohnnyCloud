@@ -1,17 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import RetroRobot from '@/components/ui/RetroRobot';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-}
+import JohnnyBot from '@/components/animation/JohnnyBot';
+import ModeToggle from '@/components/chat/ModeToggle';
+import { getAssistantMode, setAssistantMode, type AssistantMode } from '@/lib/settings';
+import { sendChat, getFallbackResponse, type ChatMessage } from '@/lib/chatService';
 
 export default function AWSChatBot() {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       text: "Hello! I'm Johnny-5, your AWS assistant. I can help you with cost optimization, security monitoring, and infrastructure insights. What would you like to know?",
@@ -21,7 +17,10 @@ export default function AWSChatBot() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [assistantMode, setAssistantModeState] = useState<AssistantMode>(getAssistantMode());
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,10 +30,32 @@ export default function AWSChatBot() {
     scrollToBottom();
   }, [messages]);
 
+  // Mode change handler with persistence
+  const changeMode = (mode: AssistantMode) => {
+    setAssistantModeState(mode);
+    setAssistantMode(mode); // persist choice
+  };
+
+  const playAudio = (audioUrl: string) => {
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.play().catch(console.error);
+      setIsPlayingAudio(true);
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlayingAudio(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       text: inputText,
       sender: 'user',
@@ -42,51 +63,83 @@ export default function AWSChatBot() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputText;
     setInputText('');
     setIsTyping(true);
 
-    // Simulate bot response (replace with actual AWS integration)
-    setTimeout(() => {
-      const botResponse: Message = {
+    try {
+      let botResponseText: string;
+      let audioUrl: string | undefined;
+
+      switch (assistantMode) {
+        case 'bedrock':
+          // Direct Bedrock integration via API
+          try {
+            const response = await sendChat(currentInput, 'bedrock');
+            botResponseText = response.message;
+            audioUrl = response.audioUrl;
+          } catch (error) {
+            console.error('Chat API error:', error);
+            botResponseText = getFallbackResponse(currentInput);
+          }
+          break;
+          
+        case 'lex':
+          // Lex + Bedrock (text only)
+          try {
+            const response = await sendChat(currentInput, 'lex');
+            botResponseText = response.message;
+          } catch (error) {
+            console.error('Lex API error:', error);
+            botResponseText = getFallbackResponse(currentInput);
+          }
+          break;
+          
+        case 'lex+voice':
+          // Lex + Bedrock + Polly (voice)
+          try {
+            const response = await sendChat(currentInput, 'lex+voice');
+            botResponseText = response.message;
+            audioUrl = response.audioUrl;
+          } catch (error) {
+            console.error('Lex+Voice API error:', error);
+            botResponseText = getFallbackResponse(currentInput);
+          }
+          break;
+          
+        default:
+          botResponseText = getFallbackResponse(currentInput);
+      }
+
+      const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputText),
+        text: botResponseText,
+        sender: 'bot',
+        timestamp: new Date(),
+        audioUrl
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+      
+      // Auto-play audio if available
+      if (audioUrl && assistantMode === 'lex+voice') {
+        setTimeout(() => playAudio(audioUrl), 500);
+      }
+      
+    } catch (error) {
+      console.error('Error processing message:', error);
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble processing your request right now. Please try again.",
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, botResponse]);
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
-  const getBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('cost') || input.includes('spend') || input.includes('billing')) {
-      return "I can help you analyze your AWS costs! Check the Metrics page for real-time cost data, anomaly detection, and optimization recommendations. Would you like me to explain any specific cost metrics?";
-    }
-    
-    if (input.includes('security') || input.includes('guardduty') || input.includes('threat')) {
-      return "Security is crucial! I monitor GuardDuty findings, IAM hygiene, and network exposure. The Metrics page shows your security posture with real-time findings. What security concerns do you have?";
-    }
-    
-    if (input.includes('ec2') || input.includes('instance') || input.includes('server')) {
-      return "EC2 instances are often the biggest cost drivers. I can help you identify unused instances, recommend Reserved Instances, or suggest right-sizing opportunities. Check the Metrics page for current EC2 costs.";
-    }
-    
-    if (input.includes('s3') || input.includes('storage') || input.includes('bucket')) {
-      return "S3 storage optimization can save significant costs! I monitor for public buckets, unused storage classes, and lifecycle policies. The Metrics page shows your S3 spending breakdown.";
-    }
-    
-    if (input.includes('help') || input.includes('what can you do')) {
-      return "I'm your AWS FinOps and SecOps assistant! I can help with:\n• Cost optimization and anomaly detection\n• Security monitoring and compliance\n• Infrastructure insights and recommendations\n• Real-time AWS data analysis\n\nWhat would you like to explore?";
-    }
-    
-    if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
-      return "Hello! I'm Johnny-5, your AWS assistant. I'm here to help you optimize costs, monitor security, and get insights into your cloud infrastructure. How can I assist you today?";
-    }
-    
-    return "I understand you're asking about AWS infrastructure. I can help with cost optimization, security monitoring, and infrastructure insights. Could you be more specific about what you'd like to know? You can also check the Metrics page for real-time data.";
-  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -98,11 +151,22 @@ export default function AWSChatBot() {
   return (
     <Card className="p-8 min-h-[500px] flex flex-col">
       <div className="text-center mb-6">
-        <RetroRobot className="mx-auto mb-4 w-24 h-24" />
+        <JohnnyBot className="mx-auto mb-4" />
         <h3 className="text-xl font-semibold mb-2">How can I help?</h3>
-        <p className="text-jc-dim text-sm">
+        <p className="text-jc-dim text-sm mb-4">
           Ask me anything about your AWS infrastructure
         </p>
+        
+        {/* Assistant Mode Switch */}
+        <div className="bg-black/20 rounded-lg p-3 mb-4">
+          <div className="text-xs text-jc-dim mb-2">Assistant Mode</div>
+          <ModeToggle mode={assistantMode} onChange={changeMode} />
+          <div className="text-xs text-jc-dim mt-2">
+            {assistantMode === 'bedrock' && 'Direct Bedrock integration via API'}
+            {assistantMode === 'lex' && 'Lex recognizes intent, Bedrock generates response'}
+            {assistantMode === 'lex+voice' && 'Lex + Bedrock + voice synthesis'}
+          </div>
+        </div>
       </div>
 
       {/* Chat Messages Area */}
@@ -123,6 +187,31 @@ export default function AWSChatBot() {
                 message.sender === 'bot' ? 'bg-white/5' : 'bg-jc-cyan/10'
               }`}>
                 <p className="text-sm whitespace-pre-line">{message.text}</p>
+                {message.audioUrl && message.sender === 'bot' && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={() => isPlayingAudio ? stopAudio() : playAudio(message.audioUrl!)}
+                      className="flex items-center gap-1 px-2 py-1 bg-jc-cyan/20 text-jc-cyan rounded text-xs hover:bg-jc-cyan/30 transition-colors"
+                    >
+                      {isPlayingAudio ? (
+                        <>
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                          </svg>
+                          Stop
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                          Play
+                        </>
+                      )}
+                    </button>
+                    <span className="text-xs text-jc-dim">Voice response</span>
+                  </div>
+                )}
               </div>
               <div className={`text-xs text-jc-dim mt-1 ${
                 message.sender === 'user' ? 'text-right' : 'text-left'
@@ -172,6 +261,13 @@ export default function AWSChatBot() {
           </svg>
         </Button>
       </div>
+      
+      {/* Hidden audio element for voice playback */}
+      <audio
+        ref={audioRef}
+        onEnded={() => setIsPlayingAudio(false)}
+        onError={() => setIsPlayingAudio(false)}
+      />
     </Card>
   );
 }

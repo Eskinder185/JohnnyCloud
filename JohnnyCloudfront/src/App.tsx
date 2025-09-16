@@ -5,6 +5,7 @@ import Metrics from "@/pages/Metrics";
 import About from "@/pages/About";
 import FAQ from "@/pages/FAQ";
 import Login from "@/pages/Login";
+import AuthCallback from "@/pages/AuthCallback";
 
 export default function App() {
   return (
@@ -20,8 +21,9 @@ export default function App() {
           <Route path="/metrics" element={<Metrics />} />
           <Route path="/about" element={<About />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/login" element={<Login />} />
         </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
     </BrowserRouter>
   );

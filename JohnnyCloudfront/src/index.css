@@ -114,6 +114,31 @@ body { @apply bg-[color:theme(colors.jc.bg)] text-[color:theme(colors.jc.text)] 
 @keyframes twinkle { 0%,100% { opacity: 0.1 } 50% { opacity: 0.3 } }
 @keyframes combPulse { 0%,100% { opacity:.9 } 50% { opacity:1 } }
 
+/* ---- JohnnyCloud animated grid background ---- */
+.jc-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(transparent 1px, rgba(0,0,0,0.85) 1px) 0 0/20px 20px,
+    radial-gradient(transparent 1px, rgba(0,0,0,0.85) 1px) 10px 10px/20px 20px,
+    linear-gradient(180deg, #0b1420 0%, #0b1320 60%, #0b1020 100%);
+  animation: jc-drift 45s linear infinite;
+  filter: saturate(110%);
+}
+
+@keyframes jc-drift {
+  0%   { background-position: 0 0, 10px 10px, 0 0; }
+  100% { background-position: 0 40px, 10px 50px, 0 0; }
+}
+
+/* glowing divider line util */
+.jc-glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0,255,255,0) 0%, rgba(0,255,255,.25) 30%, rgba(255,0,255,.25) 70%, rgba(255,0,255,0) 100%);
+  filter: blur(0.25px);
+}
+
 /* JohnnyCloud utility classes */
 @layer utilities {
   .jc-card {

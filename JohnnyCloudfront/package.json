@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-lex-runtime-v2": "^3.888.0",
+    "@aws-sdk/credential-providers": "^3.888.0",
+    "aws4fetch": "^1.0.20",
     "framer-motion": "^10.18.0",
+    "lucide-react": "^0.544.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1"

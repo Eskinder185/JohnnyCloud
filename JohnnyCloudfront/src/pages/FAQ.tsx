@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Card } from '../components/ui/Card'
 import { Heading } from '../components/ui/Heading'
 import { Button } from '../components/ui/Button'
@@ -238,13 +238,20 @@ export default function FAQ() {
           Our support team is here to help you get the most out of JohnnyCloud.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button className="flex items-center gap-2">
+          <Button 
+            className="flex items-center gap-2"
+            onClick={() => window.open('mailto:eskewabe185@gmail.com?subject=JohnnyCloud Support Request', '_blank')}
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Email Support
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => window.open('mailto:eskewabe185@gmail.com?subject=JohnnyCloud Slack Invite Request', '_blank')}
+          >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52-2.523A2.528 2.528 0 0 1 5.042 10.12h2.52v2.522a2.528 2.528 0 0 1-2.52 2.523zm0-6.048H2.522A2.528 2.528 0 0 0 0 11.64a2.528 2.528 0 0 0 2.522 2.523h2.52v-2.523a2.528 2.528 0 0 0-2.52-2.523zm6.048 0H8.562v2.522a2.528 2.528 0 0 1-2.52 2.523 2.528 2.528 0 0 1-2.522-2.523V9.117H.98a2.528 2.528 0 0 0-2.52 2.523 2.528 2.528 0 0 0 2.52 2.523h2.52v2.522a2.528 2.528 0 0 0 2.522 2.523 2.528 2.528 0 0 0 2.52-2.523v-2.522h2.52a2.528 2.528 0 0 0 2.52-2.523 2.528 2.528 0 0 0-2.52-2.523z"/>
             </svg>
@@ -254,7 +261,7 @@ export default function FAQ() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
           <div>
             <div className="font-semibold text-jc-cyan mb-1">Email</div>
-            <div className="text-jc-dim">support@johnnycloud.io</div>
+            <div className="text-jc-dim">eskewabe185@gmail.com</div>
           </div>
           <div>
             <div className="font-semibold text-jc-cyan mb-1">Response Time</div>

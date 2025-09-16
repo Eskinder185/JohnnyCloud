@@ -6,6 +6,7 @@ interface ButtonProps {
   disabled?: boolean
   className?: string
   type?: 'button' | 'submit' | 'reset'
+  variant?: 'default' | 'outline'
 }
 
 export function Button({ 
@@ -13,14 +14,17 @@ export function Button({
   onClick, 
   disabled = false, 
   className = '',
-  type = 'button'
+  type = 'button',
+  variant = 'default'
 }: ButtonProps) {
+  const baseClass = variant === 'outline' ? 'jc-btn-outline' : 'jc-btn';
+  
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`jc-btn ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${baseClass} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       {children}
     </button>

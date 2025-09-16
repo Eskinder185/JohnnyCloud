@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E6FF" />
+      <stop offset="50%" stop-color="#0EA5E9" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    <linearGradient id="headGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="eyeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7CFFB2" />
+      <stop offset="100%" stop-color="#00E6FF" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main Body -->
+  <rect x="6" y="16" width="20" height="16" rx="3" ry="3" fill="url(#bodyGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  
+  <!-- Head -->
+  <rect x="10" y="4" width="12" height="12" rx="2" ry="2" fill="url(#headGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  
+  <!-- Antenna -->
+  <line x1="16" y1="4" x2="16" y2="2" stroke="#EC5DFE" stroke-width="1" stroke-linecap="round"/>
+  <circle cx="16" cy="1.5" r="0.8" fill="#EC5DFE"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="13" cy="9" rx="1.5" ry="2.5" fill="url(#eyeGradient)"/>
+  <ellipse cx="19" cy="9" rx="1.5" ry="2.5" fill="url(#eyeGradient)"/>
+  
+  <!-- Eye highlights -->
+  <circle cx="13.5" cy="8.5" r="0.5" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="19.5" cy="8.5" r="0.5" fill="#FFFFFF" opacity="0.8"/>
+  
+  <!-- Mouth -->
+  <path d="M12 12 Q16 14 20 12" stroke="#7CFFB2" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Arms -->
+  <rect x="3" y="18" width="4" height="10" rx="2" ry="2" fill="url(#bodyGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  <rect x="25" y="18" width="4" height="10" rx="2" ry="2" fill="url(#bodyGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  
+  <!-- Hands -->
+  <ellipse cx="5" cy="27" rx="1.5" ry="2.5" fill="url(#headGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  <ellipse cx="27" cy="27" rx="1.5" ry="2.5" fill="url(#headGradient)" stroke="#00E6FF" stroke-width="0.5"/>
+  
+  <!-- Treads -->
+  <rect x="4" y="30" width="24" height="2" rx="1" ry="1" fill="#1E293B" stroke="#00E6FF" stroke-width="0.5"/>
+  
+  <!-- Tread details -->
+  <rect x="5" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="7.5" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="10" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="12.5" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="15" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="17.5" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="20" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="22.5" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  <rect x="25" y="30.5" width="1.5" height="1" rx="0.3" fill="#00E6FF" opacity="0.6"/>
+  
+  <!-- Body panels -->
+  <rect x="9" y="18" width="2.5" height="3" rx="0.3" fill="#00E6FF" opacity="0.3"/>
+  <rect x="12.5" y="18" width="2.5" height="3" rx="0.3" fill="#00E6FF" opacity="0.3"/>
+  <rect x="17" y="18" width="2.5" height="3" rx="0.3" fill="#00E6FF" opacity="0.3"/>
+  <rect x="20.5" y="18" width="2.5" height="3" rx="0.3" fill="#00E6FF" opacity="0.3"/>
+  
+  <!-- Chest panel -->
+  <rect x="14" y="21" width="4" height="4" rx="0.5" fill="#00E6FF" opacity="0.2" stroke="#00E6FF" stroke-width="0.3"/>
+  <circle cx="16" cy="23" r="0.5" fill="#00E6FF" opacity="0.6"/>
+</svg>
+
