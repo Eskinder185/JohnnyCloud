@@ -2,9 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import JohnnyBot from '@/components/animation/JohnnyBot';
-import ModeToggle from '@/components/chat/ModeToggle';
-import { getAssistantMode, setAssistantMode, type AssistantMode } from '@/lib/settings';
-import { sendChat, getFallbackResponse, type ChatMessage } from '@/lib/chatService';
+import SpeakToggle from '@/components/chat/SpeakToggle';
+import AudioControls from '@/components/chat/AudioControls';
+import { 
+  getSpeakEnabled, 
+  setSpeakEnabled,
+  getSelectedVoice,
+  setSelectedVoice,
+  type VoiceId 
+} from '@/lib/settings';
+import { sendChat, type ChatMessage } from '@/lib/chatService';
+import { audioManager } from '@/lib/audio/AudioManager';
+import { useWebSpeech } from '@/hooks/useWebSpeech';
 
 export default function AWSChatBot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -17,10 +26,22 @@ export default function AWSChatBot() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [assistantMode, setAssistantModeState] = useState<AssistantMode>(getAssistantMode());
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [speakEnabled, setSpeakEnabledState] = useState<boolean>(getSpeakEnabled());
+  const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>(getSelectedVoice());
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [micErrorState, setMicErrorState] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  
+  // Web Speech API hook
+  const { 
+    listening, 
+    interimTranscript, 
+    finalTranscript, 
+    start: startListening, 
+    stop: stopListening, 
+    isSupported: micSupported,
+    error: micError 
+  } = useWebSpeech();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,101 +51,114 @@ export default function AWSChatBot() {
     scrollToBottom();
   }, [messages]);
 
-  // Mode change handler with persistence
-  const changeMode = (mode: AssistantMode) => {
-    setAssistantModeState(mode);
-    setAssistantMode(mode); // persist choice
+  // Auto-dismiss audio error after 5 seconds
+  useEffect(() => {
+    if (audioError) {
+      const timer = setTimeout(() => {
+        setAudioError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [audioError]);
+
+  // Auto-dismiss mic error after 5 seconds
+  useEffect(() => {
+    if (micErrorState) {
+      const timer = setTimeout(() => {
+        setMicErrorState(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [micErrorState]);
+
+  // Handle mic errors from the hook
+  useEffect(() => {
+    if (micError) {
+      setMicErrorState(micError);
+      // Auto-dismiss mic errors after 5 seconds
+      const timer = setTimeout(() => {
+        setMicErrorState(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [micError]);
+
+  // Handle final transcript from speech recognition
+  useEffect(() => {
+    if (finalTranscript) {
+      setInputText(finalTranscript);
+      // Auto-send the message
+      handleSendMessage(finalTranscript);
+    }
+  }, [finalTranscript]);
+
+  // Update input text with interim transcript
+  useEffect(() => {
+    if (listening && interimTranscript) {
+      setInputText(interimTranscript);
+    }
+  }, [listening, interimTranscript]);
+
+  // Speak toggle handler
+  const handleSpeakToggle = (enabled: boolean) => {
+    setSpeakEnabledState(enabled);
+    setSpeakEnabled(enabled);
   };
 
-  const playAudio = (audioUrl: string) => {
-    if (audioRef.current) {
-      audioRef.current.src = audioUrl;
-      audioRef.current.play().catch(console.error);
-      setIsPlayingAudio(true);
+  // Voice change handler
+  const handleVoiceChange = (voice: VoiceId) => {
+    setSelectedVoiceState(voice);
+    setSelectedVoice(voice);
+  };
+
+  // Mic button handler
+  const handleMicToggle = () => {
+    if (listening) {
+      stopListening();
+    } else {
+      // Clear any previous mic errors and stop any playing audio
+      setMicErrorState(null);
+      audioManager.stop();
+      startListening();
     }
   };
 
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlayingAudio(false);
-    }
-  };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || inputText;
+    if (!textToSend.trim()) return;
+
+    // Stop any currently playing audio when user sends new message
+    audioManager.stop();
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      text: inputText,
+      text: textToSend,
       sender: 'user',
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = inputText;
     setInputText('');
     setIsTyping(true);
+    setAudioError(null);
 
     try {
-      let botResponseText: string;
-      let audioUrl: string | undefined;
+      // Determine if we should request audio based on speak toggle
+      const shouldRequestAudio = speakEnabled;
 
-      switch (assistantMode) {
-        case 'bedrock':
-          // Direct Bedrock integration via API
-          try {
-            const response = await sendChat(currentInput, 'bedrock');
-            botResponseText = response.message;
-            audioUrl = response.audioUrl;
-          } catch (error) {
-            console.error('Chat API error:', error);
-            botResponseText = getFallbackResponse(currentInput);
-          }
-          break;
-          
-        case 'lex':
-          // Lex + Bedrock (text only)
-          try {
-            const response = await sendChat(currentInput, 'lex');
-            botResponseText = response.message;
-          } catch (error) {
-            console.error('Lex API error:', error);
-            botResponseText = getFallbackResponse(currentInput);
-          }
-          break;
-          
-        case 'lex+voice':
-          // Lex + Bedrock + Polly (voice)
-          try {
-            const response = await sendChat(currentInput, 'lex+voice');
-            botResponseText = response.message;
-            audioUrl = response.audioUrl;
-          } catch (error) {
-            console.error('Lex+Voice API error:', error);
-            botResponseText = getFallbackResponse(currentInput);
-          }
-          break;
-          
-        default:
-          botResponseText = getFallbackResponse(currentInput);
-      }
-
+      // Always use bedrock mode now
+      const response = await sendChat(textToSend, shouldRequestAudio, selectedVoice);
+      
       const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: botResponseText,
+        text: response.message,
         sender: 'bot',
         timestamp: new Date(),
-        audioUrl
+        audio: response.audio
       };
 
       setMessages(prev => [...prev, botResponse]);
-      
-      // Auto-play audio if available
-      if (audioUrl && assistantMode === 'lex+voice') {
-        setTimeout(() => playAudio(audioUrl), 500);
-      }
       
     } catch (error) {
       console.error('Error processing message:', error);
@@ -157,15 +191,15 @@ export default function AWSChatBot() {
           Ask me anything about your AWS infrastructure
         </p>
         
-        {/* Assistant Mode Switch */}
+        {/* Direct Bedrock Mode Label */}
         <div className="bg-black/20 rounded-lg p-3 mb-4">
-          <div className="text-xs text-jc-dim mb-2">Assistant Mode</div>
-          <ModeToggle mode={assistantMode} onChange={changeMode} />
-          <div className="text-xs text-jc-dim mt-2">
-            {assistantMode === 'bedrock' && 'Direct Bedrock integration via API'}
-            {assistantMode === 'lex' && 'Lex recognizes intent, Bedrock generates response'}
-            {assistantMode === 'lex+voice' && 'Lex + Bedrock + voice synthesis'}
-          </div>
+          <div className="text-xs text-jc-dim mb-2">Direct Bedrock via API</div>
+          <SpeakToggle 
+            speakEnabled={speakEnabled}
+            onSpeakToggle={handleSpeakToggle}
+            selectedVoice={selectedVoice}
+            onVoiceChange={handleVoiceChange}
+          />
         </div>
       </div>
 
@@ -187,29 +221,19 @@ export default function AWSChatBot() {
                 message.sender === 'bot' ? 'bg-white/5' : 'bg-jc-cyan/10'
               }`}>
                 <p className="text-sm whitespace-pre-line">{message.text}</p>
-                {message.audioUrl && message.sender === 'bot' && (
+                
+                {/* New audio controls */}
+                {message.audio && message.sender === 'bot' && (
+                  <AudioControls 
+                    audio={message.audio} 
+                    onError={(error) => setAudioError(error)}
+                  />
+                )}
+                
+                {/* Legacy audio support - simplified */}
+                {message.audioUrl && message.sender === 'bot' && !message.audio && (
                   <div className="mt-2 flex items-center gap-2">
-                    <button
-                      onClick={() => isPlayingAudio ? stopAudio() : playAudio(message.audioUrl!)}
-                      className="flex items-center gap-1 px-2 py-1 bg-jc-cyan/20 text-jc-cyan rounded text-xs hover:bg-jc-cyan/30 transition-colors"
-                    >
-                      {isPlayingAudio ? (
-                        <>
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                          </svg>
-                          Stop
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                          Play
-                        </>
-                      )}
-                    </button>
-                    <span className="text-xs text-jc-dim">Voice response</span>
+                    <span className="text-xs text-jc-dim">Voice response available</span>
                   </div>
                 )}
               </div>
@@ -240,19 +264,67 @@ export default function AWSChatBot() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Audio Error Toast */}
+      {audioError && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center justify-between">
+          <span>{audioError}</span>
+          <button
+            onClick={() => setAudioError(null)}
+            className="text-red-300 hover:text-red-200 ml-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Mic Error Toast */}
+      {micErrorState && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center justify-between">
+          <span>{micErrorState}</span>
+          <button
+            onClick={() => setMicErrorState(null)}
+            className="text-red-300 hover:text-red-200 ml-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Chat Input */}
       <div className="flex gap-2">
+        {/* Mic Button */}
+        <button
+          onClick={handleMicToggle}
+          className={`px-3 py-2 rounded-lg transition-colors ${listening ? 'bg-jc-cyan/20 text-jc-cyan animate-pulse' : 'bg-white/10 text-jc-dim hover:bg-white/20 hover:text-white'}`}
+          disabled={!micSupported || isTyping}
+          title={listening ? "Stop listening" : "Speak your message"}
+        >
+          {listening ? (
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-jc-cyan rounded-full animate-pulse"></div>
+              <span className="text-xs">Listening...</span>
+            </div>
+          ) : (
+            <span className="text-lg">🎙️</span>
+          )}
+        </button>
+        
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask Johnny-5 anything..."
+          placeholder={listening ? "Listening..." : "Ask Johnny-5 anything..."}
           className="flex-1 bg-white/5 border border-white/10 rounded-lg p-3 focus-glow text-white placeholder-jc-dim"
           disabled={isTyping}
         />
+        
         <Button 
-          onClick={handleSendMessage} 
+          onClick={() => handleSendMessage()} 
           className="px-4"
           disabled={!inputText.trim() || isTyping}
         >
@@ -261,13 +333,6 @@ export default function AWSChatBot() {
           </svg>
         </Button>
       </div>
-      
-      {/* Hidden audio element for voice playback */}
-      <audio
-        ref={audioRef}
-        onEnded={() => setIsPlayingAudio(false)}
-        onError={() => setIsPlayingAudio(false)}
-      />
     </Card>
   );
 }

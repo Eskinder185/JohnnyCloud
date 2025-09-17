@@ -1,46 +1,72 @@
-import { sendChatOnce, sendChatStream, type ChatMode } from '@/lib/chatApi';
+import { sendChatOnce, sendChatStream } from '@/lib/chatApi';
+
+export interface AssistantAudio {
+  format: string;
+  base64?: string;
+  url?: string;
+  voice?: string;
+}
 
 export interface ChatMessage {
   id: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  audioUrl?: string;
+  audioUrl?: string; // Legacy support
+  audio?: AssistantAudio; // New audio format
 }
 
 export interface ChatResponse {
   message: string;
-  audioUrl?: string;
+  audioUrl?: string; // Legacy support
+  audio?: AssistantAudio; // New audio format
 }
 
-export async function sendChat(message: string, mode?: string): Promise<ChatResponse> {
+export async function sendChat(
+  message: string, 
+  speak?: boolean, 
+  voice?: string
+): Promise<ChatResponse> {
   try {
-    const chatMode = (mode as ChatMode) || "bedrock";
-    
     // Message will be sent directly to API
     
     // Try streaming first, fallback to regular request
-    let response = "";
+    let response: any = "";
+    let audioData: any = null;
+    
     try {
       for await (const chunk of sendChatStream({
         message,
-        mode: chatMode,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        speak,
+        voice
       })) {
-        response += chunk;
+        if (typeof chunk === 'string') {
+          response += chunk;
+        } else if (chunk && typeof chunk === 'object' && chunk.type === 'audio') {
+          audioData = chunk.data;
+        }
       }
     } catch (streamError) {
       // Fallback to non-streaming
-      response = await sendChatOnce({
+      const result = await sendChatOnce({
         message,
-        mode: chatMode,
-        sessionId: crypto.randomUUID()
+        sessionId: crypto.randomUUID(),
+        speak,
+        voice
       });
+      
+      if (typeof result === 'string') {
+        response = result;
+      } else if (result && typeof result === 'object') {
+        response = result.text;
+        audioData = result.audio;
+      }
     }
     
     return {
       message: response,
-      audioUrl: undefined // Audio handled separately for Lex modes
+      audio: audioData
     };
   } catch (error) {
     console.error('Chat API error:', error);
