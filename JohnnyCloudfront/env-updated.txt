@@ -1,0 +1,7 @@
+# Image Configuration - Updated with Better Names
+# Why AWS Page Images
+VITE_WHY_AWS_IMAGE=/images/why-aws/why-aws-hero-cloud-infrastructure.jpg
+VITE_JC_IMAGE=/images/why-aws/johnnycloud-company-logo.jpg
+
+# About Page Images
+VITE_ABOUT_HERO_IMAGE=/images/about/about-hero-team-office.jpg

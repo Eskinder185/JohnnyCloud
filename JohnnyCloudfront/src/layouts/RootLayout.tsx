@@ -1,19 +1,12 @@
-import { Outlet, useLocation } from "react-router-dom";
-import { AnimatedBackground } from "@/components/ui/bg/AnimatedBackground";
+import { Outlet } from "react-router-dom";
 import Header from "@/components/layout/Header";
+import BackgroundManager from "@/components/background/BackgroundManager";
 
 export default function RootLayout() {
-  const { pathname } = useLocation();
-  const variant =
-    pathname.startsWith("/faq") ? "secops" :
-    pathname === "/metrics" ? "finops" : "robot";
-
   return (
     <div className="min-h-dvh relative">
-      {/* Global animated background that changes based on route */}
-      <AnimatedBackground variant={variant} />
-      <div className="body-bg" />
-      <div className="stars" />
+      {/* Background System */}
+      <BackgroundManager />
 
       {/* Smart Header with conditional login */}
       <Header />

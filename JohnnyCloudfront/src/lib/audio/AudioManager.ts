@@ -9,6 +9,7 @@ export class AudioManager {
   private audio: HTMLAudioElement;
   private isCurrentlyPlaying: boolean = false;
   private currentSource: AudioSource | null = null;
+  private abortController: AbortController | null = null;
 
   constructor() {
     this.audio = new Audio();
@@ -36,10 +37,11 @@ export class AudioManager {
 
   async play(source: AudioSource): Promise<void> {
     try {
-      // Stop any currently playing audio
+      // Stop any currently playing audio and cancel in-flight requests
       this.stop();
 
       this.currentSource = source;
+      this.abortController = new AbortController();
       
       // Set the audio source
       if (source.base64) {
@@ -48,6 +50,11 @@ export class AudioManager {
         this.audio.src = source.url;
       } else {
         throw new Error('No audio source provided');
+      }
+
+      // Check if we should abort before playing
+      if (this.abortController.signal.aborted) {
+        return;
       }
 
       // Load and play
@@ -72,9 +79,16 @@ export class AudioManager {
   }
 
   stop(): void {
+    // Cancel any in-flight requests
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+
     if (this.audio) {
       this.audio.pause();
       this.audio.currentTime = 0;
+      this.audio.src = ''; // Clear the source to prevent auto-resume
       this.isCurrentlyPlaying = false;
     }
   }
@@ -100,4 +114,5 @@ export class AudioManager {
 
 // Singleton instance
 export const audioManager = new AudioManager();
+
 

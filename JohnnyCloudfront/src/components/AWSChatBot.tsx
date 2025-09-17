@@ -4,30 +4,34 @@ import { Button } from '@/components/ui/Button';
 import JohnnyBot from '@/components/animation/JohnnyBot';
 import SpeakToggle from '@/components/chat/SpeakToggle';
 import AudioControls from '@/components/chat/AudioControls';
+import StopVoiceButton from '@/components/chat/StopVoiceButton';
 import { 
-  getSpeakEnabled, 
   setSpeakEnabled,
-  getSelectedVoice,
   setSelectedVoice,
   type VoiceId 
 } from '@/lib/settings';
 import { sendChat, type ChatMessage } from '@/lib/chatService';
 import { audioManager } from '@/lib/audio/AudioManager';
 import { useWebSpeech } from '@/hooks/useWebSpeech';
+import { chatStore } from '@/lib/chatStore';
+import { formatTimestamp } from '@/lib/dateUtils';
 
 export default function AWSChatBot() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      text: "Hello! I'm Johnny-5, your AWS assistant. I can help you with cost optimization, security monitoring, and infrastructure insights. What would you like to know?",
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  // Initialize from chat store
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const storedState = chatStore.getState();
+    return storedState.messages;
+  });
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [speakEnabled, setSpeakEnabledState] = useState<boolean>(getSpeakEnabled());
-  const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>(getSelectedVoice());
+  const [speakEnabled, setSpeakEnabledState] = useState<boolean>(() => {
+    const storedState = chatStore.getState();
+    return storedState.speakEnabled;
+  });
+  const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>(() => {
+    const storedState = chatStore.getState();
+    return storedState.selectedVoice as VoiceId;
+  });
   const [audioError, setAudioError] = useState<string | null>(null);
   const [micErrorState, setMicErrorState] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -50,6 +54,13 @@ export default function AWSChatBot() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      audioManager.stop();
+    };
+  }, []);
 
   // Auto-dismiss audio error after 5 seconds
   useEffect(() => {
@@ -103,12 +114,14 @@ export default function AWSChatBot() {
   const handleSpeakToggle = (enabled: boolean) => {
     setSpeakEnabledState(enabled);
     setSpeakEnabled(enabled);
+    chatStore.setSpeakEnabled(enabled);
   };
 
   // Voice change handler
   const handleVoiceChange = (voice: VoiceId) => {
     setSelectedVoiceState(voice);
     setSelectedVoice(voice);
+    chatStore.setSelectedVoice(voice);
   };
 
   // Mic button handler
@@ -138,7 +151,9 @@ export default function AWSChatBot() {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    chatStore.setMessages(newMessages);
     setInputText('');
     setIsTyping(true);
     setAudioError(null);
@@ -158,7 +173,9 @@ export default function AWSChatBot() {
         audio: response.audio
       };
 
-      setMessages(prev => [...prev, botResponse]);
+      const finalMessages = [...newMessages, botResponse];
+      setMessages(finalMessages);
+      chatStore.setMessages(finalMessages);
       
     } catch (error) {
       console.error('Error processing message:', error);
@@ -168,7 +185,9 @@ export default function AWSChatBot() {
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorResponse]);
+      const errorMessages = [...newMessages, errorResponse];
+      setMessages(errorMessages);
+      chatStore.setMessages(errorMessages);
     } finally {
       setIsTyping(false);
     }
@@ -194,12 +213,15 @@ export default function AWSChatBot() {
         {/* Direct Bedrock Mode Label */}
         <div className="bg-black/20 rounded-lg p-3 mb-4">
           <div className="text-xs text-jc-dim mb-2">Direct Bedrock via API</div>
-          <SpeakToggle 
-            speakEnabled={speakEnabled}
-            onSpeakToggle={handleSpeakToggle}
-            selectedVoice={selectedVoice}
-            onVoiceChange={handleVoiceChange}
-          />
+          <div className="flex items-center gap-2">
+            <SpeakToggle 
+              speakEnabled={speakEnabled}
+              onSpeakToggle={handleSpeakToggle}
+              selectedVoice={selectedVoice}
+              onVoiceChange={handleVoiceChange}
+            />
+            <StopVoiceButton />
+          </div>
         </div>
       </div>
 
@@ -240,7 +262,7 @@ export default function AWSChatBot() {
               <div className={`text-xs text-jc-dim mt-1 ${
                 message.sender === 'user' ? 'text-right' : 'text-left'
               }`}>
-                {message.timestamp.toLocaleTimeString()}
+                {formatTimestamp(message.timestamp)}
               </div>
             </div>
           </div>
@@ -332,6 +354,14 @@ export default function AWSChatBot() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
         </Button>
+      </div>
+      
+      {/* Quick links */}
+      <div className="mt-3 text-xs opacity-70">
+        Quick links:{" "}
+        <a href="/guardrails" className="underline hover:opacity-80">Guardrails</a>{" • "}
+        <a href="/why-aws" className="underline hover:opacity-80">Why AWS</a>{" • "}
+        <a href="/metrics" className="underline hover:opacity-80">Metrics</a>
       </div>
     </Card>
   );

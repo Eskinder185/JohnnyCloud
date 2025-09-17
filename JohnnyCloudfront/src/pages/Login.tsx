@@ -8,7 +8,6 @@ export default function Login() {
 
   return (
     <main className="relative min-h-[calc(100vh-64px)] text-slate-100">
-      <div className="jc-bg" />
 
       <section className="mx-auto max-w-7xl px-6 pb-16 pt-12 md:pt-20">
         {/* Heading + blurb */}

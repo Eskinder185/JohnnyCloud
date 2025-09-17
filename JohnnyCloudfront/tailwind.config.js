@@ -16,6 +16,23 @@ export default {
           cyan: '#00E6FF',
           pink: '#EC5DFE',
           green: '#7CFFB2',
+        },
+        // Typography color tokens
+        text: {
+          primary: '#E6F1FF',
+          secondary: '#B5C7DB',
+          muted: '#8EA0B5',
+          inverse: '#0B1220',
+        },
+        link: {
+          DEFAULT: '#7FD1FF',
+          hover: '#A7E3FF',
+        },
+        severity: {
+          success: '#3DDC97',
+          warning: '#F6C453',
+          danger: '#FF6B6B',
+          info: '#6FB7FF',
         }
       },
       boxShadow: {
@@ -27,50 +44,30 @@ export default {
         'xl': '1rem',
         '2xl': '1.5rem',
       },
-      backgroundImage: {
-        'grid': 'linear-gradient(rgba(0,230,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,255,0.1) 1px, transparent 1px)',
-        'vignette': 'radial-gradient(ellipse at center, transparent 0%, rgba(11,18,32,0.8) 100%)',
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
-      backgroundSize: {
-        'grid': '20px 20px',
+      fontSize: {
+        'h1': ['2.5rem', { lineHeight: '1.15', fontWeight: '700' }], // 40px
+        'h2': ['2rem', { lineHeight: '1.2', fontWeight: '700' }],   // 32px
+        'h3': ['1.5rem', { lineHeight: '1.25', fontWeight: '600' }], // 24px
+        'body-lg': ['1.125rem', { lineHeight: '1.55', fontWeight: '400' }], // 18px
+        'body': ['1rem', { lineHeight: '1.6', fontWeight: '400' }], // 16px
+        'small': ['0.875rem', { lineHeight: '1.55', fontWeight: '400' }], // 14px
+        'meta': ['0.8125rem', { lineHeight: '1.55', fontWeight: '400' }], // 13px
       },
+      // Legacy background configurations removed
       keyframes: {
         floaty: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
         },
-        twinkle: {
-          '0%, 100%': { opacity: '0.1' },
-          '50%': { opacity: '0.3' },
-        },
-        gridScan: {
-          'to': { backgroundPosition: '200% 0, 0 200%' },
-        },
-        barDrift: {
-          '0%, 100%': { opacity: '0.9' },
-          '50%': { opacity: '1' },
-        },
-        sweep: {
-          'to': { transform: 'rotate(1turn)' },
-        },
-        spark: {
-          '0%': { opacity: '0.25' },
-          '50%': { opacity: '0.6' },
-          '100%': { opacity: '0.25' },
-        },
-        combPulse: {
-          '0%, 100%': { opacity: '0.9' },
-          '50%': { opacity: '1' },
-        },
+        // Legacy background animation keyframes removed
       },
       animation: {
         floaty: 'floaty 3s ease-in-out infinite',
-        twinkle: 'twinkle 2s ease-in-out infinite',
-        gridScan: 'gridScan 12s linear infinite',
-        barDrift: 'barDrift 18s ease-in-out infinite',
-        sweep: 'sweep 4.8s linear infinite',
-        spark: 'spark 3.2s ease-in-out infinite',
-        combPulse: 'combPulse 6s ease-in-out infinite',
+        // Legacy background animations removed
       },
     },
   },

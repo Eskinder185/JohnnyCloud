@@ -85,3 +85,18 @@ export function isLoggedIn(): boolean {
     return false;
   }
 }
+
+export function getUserInfo(): { name?: string; email?: string; account?: string } {
+  const token = getJwt();
+  if (!token) return {};
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return {
+      name: payload.name || payload.given_name || payload.preferred_username,
+      email: payload.email,
+      account: payload['cognito:username'] || payload.sub
+    };
+  } catch {
+    return {};
+  }
+}

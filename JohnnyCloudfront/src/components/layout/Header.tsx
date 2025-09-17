@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { isLoggedIn, signOut, startLogin } from "@/lib/auth";
+import MotionSettings from "@/components/settings/MotionSettings";
 
 export default function Header() {
   const authed = isLoggedIn();
@@ -13,11 +14,14 @@ export default function Header() {
         <nav className="ml-4 hidden md:flex items-center gap-3 text-sm">
           <Link to="/" className="jc-chip">Home</Link>
           <Link to="/metrics" className="jc-chip">Metrics</Link>
+          <Link to="/guardrails" className="jc-chip">Guardrails</Link>
+          <Link to="/why-aws" className="jc-chip">Why AWS</Link>
           <Link to="/about" className="jc-chip">About</Link>
           <Link to="/faq" className="jc-chip">FAQ</Link>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <MotionSettings />
           {authed ? (
             <>
               <span className="px-2 py-1 rounded-xl bg-white/10 text-xs">Signed in</span>

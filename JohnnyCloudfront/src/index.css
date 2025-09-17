@@ -4,133 +4,26 @@
 
 :root { color-scheme: dark; }
 html, body, #root { height: 100%; }
-body { @apply bg-[color:theme(colors.jc.bg)] text-[color:theme(colors.jc.text)] font-sans; }
-
-/* Subtle starfield + grid like the screenshots */
-.body-bg {
-  position: fixed; inset: 0; z-index: -2;
-  background:
-    theme(backgroundImage.vignette),
-    theme(backgroundImage.grid),
-    radial-gradient(circle at 20% 15%, rgba(0,230,255,.12) 0%, transparent 40%),
-    radial-gradient(circle at 80% 35%, rgba(236,93,254,.06) 0%, transparent 35%),
-    radial-gradient(circle at 50% 90%, rgba(227,255,91,.07) 0%, transparent 35%),
-    theme(colors.jc.bg);
-  background-size:
-    100% 100%,
-    theme(backgroundSize.grid),
-    100% 100%, 100% 100%, 100% 100%,
-    auto;
-  background-position: center;
+body { 
+  @apply bg-[color:theme(colors.jc.bg)] text-text-primary font-sans; 
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-.stars {
-  position: fixed; inset: 0; pointer-events: none; z-index: -1;
+/* Pause animations when tab is not visible or user prefers reduced motion */
+.animations-paused *,
+.animations-paused *::before,
+.animations-paused *::after {
+  animation-play-state: paused !important;
 }
-.stars::before, .stars::after {
-  content: ""; position: absolute; inset: 0; background-repeat: repeat;
-}
-/* small twinkles */
-.stars::before {
-  background-image: radial-gradient(rgba(255,255,255,.25) 1px, transparent 1px);
-  background-size: 3px 3px; opacity: .15; animation: twinkle 2.2s ease-in-out infinite;
-}
-/* sparse brighter dots */
-.stars::after {
-  background-image: radial-gradient(rgba(166,247,255,.75) 1px, transparent 1px);
-  background-size: 8px 8px; opacity: .08; animation: twinkle 3.4s ease-in-out infinite;
-}
+
+/* Legacy background styles removed - using static dark background */
 
 /* Utility for ring glow on focus */
 .focus-glow:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,230,255,.35); }
 
-/* Global live background */
-.animated-bg { position: fixed; inset: 0; pointer-events: none; z-index: -3; opacity: .9; }
+/* Legacy animated background styles removed */
 
-/* FinOps: moving bar-grid + scan */
-.animated-bg.finops{
-  background:
-    repeating-linear-gradient(90deg, rgba(0,230,255,.08) 0 2px, transparent 2px 38px),
-    repeating-linear-gradient(0deg,  rgba(124,255,178,.06) 0 2px, transparent 2px 28px);
-  animation: gridScan 12s linear infinite, barDrift 18s ease-in-out infinite;
-}
-
-/* SecOps: radar rings + sweeping beam */
-.animated-bg.secops{
-  background:
-    radial-gradient(circle at 50% 60%, rgba(0,230,255,.06), transparent 45%),
-    radial-gradient(circle at 50% 60%, rgba(0,230,255,.05) 2px, transparent 3px) 0 0/8% 8%,
-    radial-gradient(circle at 50% 60%, rgba(0,230,255,.08) 1px, transparent 2px) 0 0/16% 16%;
-}
-.animated-bg.secops::after{
-  content:""; position:absolute; inset:0; border-radius:50%;
-  background: conic-gradient(from 0deg, rgba(0,230,255,.18), rgba(0,230,255,0) 35%);
-  transform-origin: 50% 60%;
-  animation: sweep 4.8s linear infinite;
-}
-
-/* Robot: neon traces + sparks */
-.animated-bg.robot{
-  background:
-    repeating-linear-gradient(90deg, rgba(236,93,254,.05) 0 1px, transparent 1px 60px),
-    repeating-linear-gradient(0deg,  rgba(0,230,255,.06) 0 1px, transparent 1px 60px);
-}
-.animated-bg.robot::before,
-.animated-bg.robot::after{
-  content:""; position:absolute; inset:0; mix-blend-mode:screen; pointer-events:none;
-}
-.animated-bg.robot::before{
-  background:
-    radial-gradient(circle at 20% 30%, rgba(0,230,255,.2), transparent 35%),
-    radial-gradient(circle at 80% 20%, rgba(236,93,254,.18), transparent 40%),
-    radial-gradient(circle at 50% 85%, rgba(227,255,91,.16), transparent 40%);
-  filter: blur(6px);
-}
-.animated-bg.robot::after{
-  background: repeating-linear-gradient(90deg, rgba(166,247,255,.22) 0 2px, transparent 2px 24px);
-  mask: radial-gradient(600px 400px at 50% 70%, #000 50%, transparent 70%);
-  animation: spark 3.2s ease-in-out infinite;
-}
-
-/* Honeycomb security vibe for Login */
-.honeycomb-bg {
-  position: fixed; inset: 0; z-index: -2;
-  background:
-    linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.35)),
-    repeating-linear-gradient(60deg, rgba(0,230,255,.06) 0 2px, transparent 2px 40px),
-    repeating-linear-gradient(-60deg, rgba(236,93,254,.05) 0 2px, transparent 2px 40px),
-    radial-gradient(1200px 800px at 50% 0%, rgba(0,230,255,0.07), transparent 60%),
-    #0B1220;
-  -webkit-mask: radial-gradient(circle at 50% 0%, rgba(0,0,0,1), rgba(0,0,0,.5) 60%, transparent 85%);
-          mask: radial-gradient(circle at 50% 0%, rgba(0,0,0,1), rgba(0,0,0,.5) 60%, transparent 85%);
-  animation: combPulse 6s ease-in-out infinite;
-}
-
-/* Keyframes */
-@keyframes gridScan { to { background-position: 200% 0, 0 200%; } }
-@keyframes barDrift { 0%,100% { opacity:.9 } 50% { opacity:1 } }
-@keyframes sweep { to { transform: rotate(1turn); } }
-@keyframes spark { 0% { opacity:.25 } 50% { opacity:.6 } 100% { opacity:.25 } }
-@keyframes twinkle { 0%,100% { opacity: 0.1 } 50% { opacity: 0.3 } }
-@keyframes combPulse { 0%,100% { opacity:.9 } 50% { opacity:1 } }
-
-/* ---- JohnnyCloud animated grid background ---- */
-.jc-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(transparent 1px, rgba(0,0,0,0.85) 1px) 0 0/20px 20px,
-    radial-gradient(transparent 1px, rgba(0,0,0,0.85) 1px) 10px 10px/20px 20px,
-    linear-gradient(180deg, #0b1420 0%, #0b1320 60%, #0b1020 100%);
-  animation: jc-drift 45s linear infinite;
-  filter: saturate(110%);
-}
-
-@keyframes jc-drift {
-  0%   { background-position: 0 0, 10px 10px, 0 0; }
-  100% { background-position: 0 40px, 10px 50px, 0 0; }
-}
+/* Legacy keyframes and jc-bg styles removed */
 
 /* glowing divider line util */
 .jc-glow-line {
@@ -168,4 +61,108 @@ body { @apply bg-[color:theme(colors.jc.bg)] text-[color:theme(colors.jc.text)] 
   .jc-dot {
     @apply w-2 h-2 rounded-full;
   }
+
+  /* Typography utilities */
+  .text-primary {
+    @apply text-text-primary;
+  }
+  
+  .text-secondary {
+    @apply text-text-secondary;
+  }
+  
+  .text-muted {
+    @apply text-text-muted;
+  }
+  
+  .text-inverse {
+    @apply text-text-inverse;
+  }
+  
+  .link {
+    @apply text-link hover:text-link-hover underline-offset-4 hover:underline focus:underline;
+  }
+  
+  .text-success {
+    @apply text-severity-success;
+  }
+  
+  .text-warning {
+    @apply text-severity-warning;
+  }
+  
+  .text-danger {
+    @apply text-severity-danger;
+  }
+  
+  .text-info {
+    @apply text-severity-info;
+  }
+}
+
+/* --- Typewriter caret --- */
+@keyframes caret-blink {
+  0%, 40% { opacity: 1 }
+  50%, 90% { opacity: 0 }
+  100% { opacity: 1 }
+}
+
+/* --- Soft glow pulse for titles --- */
+@keyframes glow-pulse {
+  0%,100% { text-shadow: 0 0 0 rgba(167,139,250,0.0), 0 0 0 rgba(56,189,248,0.0) }
+  50%     { text-shadow: 0 0 12px rgba(167,139,250,0.55), 0 0 22px rgba(56,189,248,0.35) }
+}
+
+/* Tiny helpers */
+.text-glow        { animation: glow-pulse 3.2s ease-in-out infinite }
+.caret            { display:inline-block; width:1ch; border-right:1px solid rgba(255,255,255,.7); animation: caret-blink 1s steps(1,end) infinite }
+.reveal           { opacity:0; transform: translateY(6px); transition: opacity .7s ease, transform .7s ease }
+.reveal.show      { opacity:1; transform: translateY(0) }
+
+/* ===== Core motions (subtle, fast) ===== */
+@keyframes fade-up   { from {opacity:0; transform:translateY(8px)} to {opacity:1; transform:translateY(0)} }
+@keyframes fade-left { from {opacity:0; transform:translateX(12px)} to {opacity:1; transform:translateX(0)} }
+@keyframes fade-right{ from {opacity:0; transform:translateX(-12px)} to {opacity:1; transform:translateX(0)} }
+@keyframes pop-in    { from {opacity:0; transform:scale(.96)} to {opacity:1; transform:scale(1)} }
+@keyframes float-slow{ 0%,100% {transform:translateY(0)} 50% {transform:translateY(-6px)} }
+
+.reveal        { opacity:0; transform:translateY(8px) }
+.reveal.in     { animation: fade-up .6s ease forwards }
+.reveal-left   { opacity:0; transform:translateX(12px) }
+.reveal-left.in{ animation: fade-left .6s ease forwards }
+.reveal-right  { opacity:0; transform:translateX(-12px) }
+.reveal-right.in{animation: fade-right .6s ease forwards }
+
+.pop-in        { animation: pop-in .4s ease both }
+.float-slow    { animation: float-slow 8s ease-in-out infinite }
+
+/* Hover micro-interactions */
+.card-lift     { transition: transform .25s ease, box-shadow .25s ease }
+.card-lift:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(0,0,0,.25) }
+
+/* Keep colors consistent with your app (white + opacities) */
+.text-title    { color: #fff }          /* same as your headings */
+.text-body     { color: rgba(255,255,255,.72) } /* same as other paragraphs */
+.text-faint    { color: rgba(255,255,255,.56) } /* small meta text */
+
+/* Custom slider styles for savings calculator */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #06b6d4;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #06b6d4;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

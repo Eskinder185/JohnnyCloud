@@ -1,0 +1,19 @@
+{
+    "type": "module",
+    "scripts": {
+      "build": "node esbuild.config.mjs",
+      "zip": "npm run build && cd dist && zip -r ../chat.zip ."
+    },
+    "dependencies": {
+      "@aws-sdk/client-bedrock-runtime": "^3",
+      "@aws-sdk/client-cost-explorer": "^3",
+      "@aws-sdk/client-securityhub": "^3",
+      "@aws-sdk/client-guardduty": "^3",
+      "@aws-sdk/client-dynamodb": "^3",
+      "@aws-sdk/client-polly": "^3"
+    },
+    "devDependencies": {
+      "esbuild": "^0.23.0"
+    }
+  }
+  

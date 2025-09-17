@@ -17,102 +17,222 @@ interface FAQCategory {
   items: FAQItem[];
 }
 
+// FAQ content (categorised). If your component expects a different shape,
+// adapt keys: id, category, q, a, tags are all safe to keep.
+
+const FAQS = [
+  /* =======================
+     General
+  ========================*/
+  {
+    id: "what-is-johnnycloud",
+    category: "General",
+    q: "What is JohnnyCloud?",
+    a: `JohnnyCloud is an AI-powered FinOps + SecOps companion for AWS. It
+analyzes your accounts for savings opportunities, surfaces compliance Guardrails
+(CIS/NIST/PCI), and can trigger safe auto-remediation for common risks like
+S3 public access. You can also ask the assistant (with optional voice replies)
+for summaries, next steps, or a Why AWS business case.`,
+    tags: ["overview", "finops", "secops", "guardrails"],
+  },
+  {
+    id: "how-it-works",
+    category: "General",
+    q: "How does JohnnyCloud work?",
+    a: `You connect your AWS account via least-privilege roles. We read metrics
+(Cost Explorer/CloudWatch) and posture signals (Security Hub/GuardDuty) to
+compute savings and compliance scores. From the Guardrails page you can run
+prebuilt SSM Automation runbooks (e.g., block S3 public access) and download
+evidence for audits.`,
+    tags: ["onboarding", "permissions"],
+  },
+  {
+    id: "why-aws",
+    category: "General",
+    q: "What is the \"Why AWS\" page?",
+    a: `It's a value dashboard. We combine cost savings estimates, security score,
+reliability readiness (backups/Multi-AZ/RTO/RPO) and efficiency (managed &
+serverless adoption) so you can explain the business case clearly. See the value dashboard on the Why AWS page.`,
+    tags: ["value", "roi", "modernization"],
+  },
+  {
+    id: "voice",
+    category: "General",
+    q: "Can the assistant speak responses?",
+    a: `Yes. Toggle "Speak reply" above the chat and pick a voice. The app uses
+Amazon Polly to synthesize answers. No microphone is required unless you enable
+voice input (optional Transcribe integration).`,
+    tags: ["voice", "polly"],
+  },
+  {
+    id: "setup-time",
+    category: "General",
+    q: "How long does it take to set up?",
+    a: `Most teams see the dashboard within 10–20 minutes after connecting an
+account. Guardrails and auto-remediation can be enabled progressively.`,
+    tags: ["onboarding", "time"],
+  },
+
+  /* =======================
+     Costs
+  ========================*/
+  {
+    id: "cost-sources",
+    category: "Costs",
+    q: "Where do savings estimates come from?",
+    a: `From a combination of Cost Explorer data and best-practice checks:
+rightsizing, idle resources, scheduling, and Savings Plans/CUDOs coverage. The
+total shown is a directional estimate until you apply changes.`,
+    tags: ["estimates", "rightsizing", "scheduling"],
+  },
+  {
+    id: "real-time",
+    category: "Costs",
+    q: "Is the metrics data real-time?",
+    a: `AWS cost data is near-real-time and can lag a few hours depending on the
+service. We show the latest available window and date-stamp the snapshot.`,
+    tags: ["freshness", "lag"],
+  },
+
+  /* =======================
+     Security
+  ========================*/
+  {
+    id: "frameworks",
+    category: "Security",
+    q: "Which compliance frameworks are supported?",
+    a: `CIS AWS Foundations Benchmark by default, plus NIST and PCI where
+enabled in Security Hub. You can switch frameworks from the Guardrails page.`,
+    tags: ["cis", "nist", "pci", "security hub"],
+  },
+  {
+    id: "guardrails",
+    category: "Security",
+    q: "What are Guardrails?",
+    a: `Guardrails are continuous checks mapped to standards (e.g., CIS-1.1 "S3
+Block Public Access"). The page shows PASS/FAIL/WARN by control with affected
+resources. You can click Remediate to run an SSM Automation (e.g., block public
+ACL/policy) and view/download evidence. Open Guardrails to see them in action.`,
+    tags: ["controls", "remediation", "evidence"],
+  },
+  {
+    id: "remediation-safety",
+    category: "Security",
+    q: "Is auto-remediation safe?",
+    a: `Yes—remediation is explicit and scoped. Each runbook shows what it does,
+supports dry-run where possible, and executes via a role you control. Evidence
+(records and execution IDs) is saved for audit trails.`,
+    tags: ["ssm", "least-privilege", "audit"],
+  },
+  {
+    id: "data-security",
+    category: "Security",
+    q: "What data do you store?",
+    a: `By default, we read from your account and return results to the UI. We do
+not store sensitive data outside your account. Remediation evidence and chat
+threads can be saved in your own DynamoDB tables if you enable that option.`,
+    tags: ["privacy", "storage"],
+  },
+
+  /* =======================
+     Troubleshooting
+  ========================*/
+  {
+    id: "faq-404-guardrails",
+    category: "Troubleshooting",
+    q: "I get 404 for /guardrails/summary.",
+    a: `Add an API Gateway route: ANY /guardrails/{proxy+} → your guardrails
+Lambda. Deploy the stage. If you prefer explicit routes, add:
+GET /guardrails/summary, POST /guardrails/remediate, GET /guardrails/evidence.`,
+    tags: ["api-gateway", "routes"],
+  },
+  {
+    id: "faq-cors",
+    category: "Troubleshooting",
+    q: "The browser shows a CORS error.",
+    a: `Return CORS headers from Lambda (and/or enable CORS on the API):
+access-control-allow-origin: your CloudFront URL,
+access-control-allow-headers: content-type,authorization,
+access-control-allow-methods: GET,POST,OPTIONS. Also handle OPTIONS with 204.`,
+    tags: ["cors", "options"],
+  },
+  {
+    id: "faq-500-chat",
+    category: "Troubleshooting",
+    q: "Ask JohnnyCloud fails with 500.",
+    a: `Check CloudWatch logs for your /chat Lambda. Common causes:
+1) bedrock:InvokeModel not allowed or wrong model ID (use claude-3-5-sonnet or haiku),
+2) polly:SynthesizeSpeech missing (if Speak reply is on),
+3) DynamoDB table missing/denied for chat threads,
+4) Malformed JSON body—add a safe body parser.`,
+    tags: ["bedrock", "polly", "dynamodb"],
+  },
+  {
+    id: "faq-env",
+    category: "Troubleshooting",
+    q: "Which frontend environment variables are required?",
+    a: `Minimum: VITE_CHAT_API, VITE_GUARDRAILS_API, VITE_METRICS_API (or an
+optimize endpoint). Optional: VITE_WHY_AWS_IMAGE (hero), VITE_ABOUT_HERO_IMAGE.
+Always restart Vite after editing .env.`,
+    tags: ["env", "vite"],
+  },
+  {
+    id: "faq-permissions",
+    category: "Troubleshooting",
+    q: "What AWS permissions are needed?",
+    a: `Read paths: Cost Explorer (ce:Get*), Security Hub (GetFindings), GuardDuty
+(List/GetFindings). Remediation: ssm:StartAutomationExecution plus the actions
+inside each runbook (e.g., s3:PutPublicAccessBlock). Chat: bedrock:InvokeModel;
+voice: polly:SynthesizeSpeech; evidence: dynamodb:PutItem/Query on your tables.`,
+    tags: ["iam", "roles"],
+  },
+];
+
+// Convert to the existing format with enhanced answers
 const faqData: FAQCategory[] = [
   {
     id: 'general',
     name: 'General',
     icon: '?',
-    count: 4,
-    items: [
-      {
-        question: 'What is JohnnyCloud?',
-        answer: 'JohnnyCloud is a comprehensive AWS FinOps and SecOps platform that helps you monitor, optimize, and secure your cloud infrastructure with intelligent automation and real-time insights.'
-      },
-      {
-        question: 'How does JohnnyCloud work?',
-        answer: 'JohnnyCloud connects to your AWS accounts using secure cross-account roles, analyzes your infrastructure and costs in real-time, and provides actionable insights and automated recommendations.'
-      },
-      {
-        question: 'What AWS services does JohnnyCloud support?',
-        answer: 'JohnnyCloud supports all major AWS services including EC2, S3, RDS, Lambda, CloudFormation, and more. We continuously add support for new AWS services as they become available.'
-      },
-      {
-        question: 'How long does it take to set up?',
-        answer: 'Setup typically takes 5-10 minutes. You\'ll need to create cross-account roles in your AWS accounts and connect them to JohnnyCloud. Our setup wizard guides you through each step.'
-      }
-    ]
+    count: FAQS.filter(f => f.category === 'General').length,
+    items: FAQS.filter(f => f.category === 'General').map(f => ({
+      question: f.q,
+      answer: f.id === 'why-aws' 
+        ? `It's a value dashboard. We combine cost savings estimates, security score, reliability readiness (backups/Multi-AZ/RTO/RPO) and efficiency (managed & serverless adoption) so you can explain the business case clearly. See the value dashboard on the Why AWS page.`
+        : f.a
+    }))
   },
   {
     id: 'costs',
     name: 'Costs',
     icon: '$',
-    count: 4,
-    items: [
-      {
-        question: 'How much can I save with JohnnyCloud?',
-        answer: 'Our customers typically save 15-30% on their AWS costs within the first 3 months by identifying unused resources, optimizing instance types, and implementing cost-effective architectures.'
-      },
-      {
-        question: 'How does cost anomaly detection work?',
-        answer: 'Our AI engine analyzes your historical spending patterns and identifies unusual spikes or trends. You\'ll receive real-time alerts when costs deviate from normal patterns.'
-      },
-      {
-        question: 'Can I set custom cost budgets and alerts?',
-        answer: 'Yes! You can set monthly, quarterly, or annual budgets with custom alert thresholds. Get notified via email, Slack, or webhook when you approach or exceed your limits.'
-      },
-      {
-        question: 'Does JohnnyCloud help with Reserved Instance planning?',
-        answer: 'Absolutely! We analyze your usage patterns and recommend optimal Reserved Instance purchases, including instance types, terms, and payment options to maximize your savings.'
-      }
-    ]
+    count: FAQS.filter(f => f.category === 'Costs').length,
+    items: FAQS.filter(f => f.category === 'Costs').map(f => ({
+      question: f.q,
+      answer: f.a
+    }))
   },
   {
     id: 'security',
     name: 'Security',
     icon: '🛡️',
-    count: 4,
-    items: [
-      {
-        question: 'How does JohnnyCloud access my AWS accounts?',
-        answer: 'JohnnyCloud uses secure cross-account IAM roles with minimal read-only permissions. We never store your AWS credentials and only access the data necessary for analysis.'
-      },
-      {
-        question: 'What security compliance frameworks do you support?',
-        answer: 'We support SOC 2 Type II, ISO 27001, GDPR, and HIPAA compliance requirements. Our infrastructure is regularly audited by third-party security firms.'
-      },
-      {
-        question: 'How does GuardDuty integration work?',
-        answer: 'JohnnyCloud integrates with AWS GuardDuty to correlate security findings with cost and infrastructure data, providing comprehensive security posture insights.'
-      },
-      {
-        question: 'Is my data secure with JohnnyCloud?',
-        answer: 'Yes! All data is encrypted in transit and at rest using AES-256 encryption. We use read-only access and never store sensitive information like passwords or API keys.'
-      }
-    ]
+    count: FAQS.filter(f => f.category === 'Security').length,
+    items: FAQS.filter(f => f.category === 'Security').map(f => ({
+      question: f.q,
+      answer: f.id === 'guardrails'
+        ? `Guardrails are continuous checks mapped to standards (e.g., CIS-1.1 "S3 Block Public Access"). The page shows PASS/FAIL/WARN by control with affected resources. You can click Remediate to run an SSM Automation (e.g., block public ACL/policy) and view/download evidence. Open Guardrails to see them in action.`
+        : f.a
+    }))
   },
   {
     id: 'troubleshooting',
     name: 'Troubleshooting',
     icon: '⚠️',
-    count: 4,
-    items: [
-      {
-        question: 'Why am I not seeing data for some of my AWS accounts?',
-        answer: 'This usually means the cross-account role isn\'t properly configured or the account hasn\'t been connected yet. Check your IAM role permissions and ensure the account is added to JohnnyCloud.'
-      },
-      {
-        question: 'How often is data updated?',
-        answer: 'Cost and usage data is updated every 4-6 hours. Security findings and infrastructure changes are updated in real-time as they occur in your AWS accounts.'
-      },
-      {
-        question: 'Why are some of my resources not showing up?',
-        answer: 'Some resources might not appear if they\'re in regions we don\'t monitor, have very low costs, or are part of services we don\'t yet support. Contact support if you notice missing resources.'
-      },
-      {
-        question: 'Can I export data from JohnnyCloud?',
-        answer: 'Yes! You can export cost reports, security findings, and infrastructure data in CSV, JSON, or PDF formats. API access is also available for programmatic data retrieval.'
-      }
-    ]
+    count: FAQS.filter(f => f.category === 'Troubleshooting').length,
+    items: FAQS.filter(f => f.category === 'Troubleshooting').map(f => ({
+      question: f.q,
+      answer: f.a
+    }))
   }
 ];
 
@@ -133,10 +253,15 @@ export default function FAQ() {
 
   const filteredItems = faqData
     .find(cat => cat.id === activeCategory)
-    ?.items.filter(item => 
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    ?.items.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      const faqItem = FAQS.find(f => f.q === item.question);
+      return (
+        item.question.toLowerCase().includes(searchLower) ||
+        item.answer.toLowerCase().includes(searchLower) ||
+        (faqItem && faqItem.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+      );
+    }) || [];
 
   return (
     <>
@@ -152,8 +277,7 @@ export default function FAQ() {
       <header className="mb-8">
         <Heading className="text-4xl md:text-5xl">Frequently Asked Questions</Heading>
         <p className="text-jc-dim text-lg mt-4 max-w-3xl">
-          Find answers to common questions about JohnnyCloud. Can't find what you're looking for? 
-          Contact our support team.
+          Find answers about cost insights, Guardrails, auto-remediation, voice replies, and setup.
         </p>
       </header>
 
@@ -162,7 +286,7 @@ export default function FAQ() {
         <div className="relative max-w-2xl">
           <input
             type="text"
-            placeholder="Search FAQs..."
+            placeholder="Search FAQs…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl p-4 pl-12 focus-glow"
@@ -218,7 +342,25 @@ export default function FAQ() {
               </button>
               {isExpanded && (
                 <div className="px-6 pb-6">
-                  <p className="text-jc-dim leading-relaxed">{item.answer}</p>
+                  <p className="text-jc-dim leading-relaxed">
+                    {item.answer.split(' ').map((word, index) => {
+                      if (word === 'Why' && item.answer.split(' ')[index + 1] === 'AWS') {
+                        return (
+                          <span key={index}>
+                            <a href="/why-aws" className="underline hover:text-jc-cyan transition-colors">Why AWS</a>{' '}
+                          </span>
+                        );
+                      }
+                      if (word === 'Guardrails' && item.answer.split(' ')[index - 1] === 'Open') {
+                        return (
+                          <span key={index}>
+                            <a href="/guardrails" className="underline hover:text-jc-cyan transition-colors">Guardrails</a>{' '}
+                          </span>
+                        );
+                      }
+                      return word + ' ';
+                    })}
+                  </p>
                 </div>
               )}
             </Card>
