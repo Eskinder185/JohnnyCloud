@@ -232,10 +232,8 @@ Cognito redirect and logout URIs match the deployed host
 
 Metrics and Guardrails show data or helpful empty states
 
-Safe operations
+-------------------------------------------------------
 
-Remediation only runs after explicit user action
-
-Preview step works and shows required permissions
 
 Actions are stored in DynamoDB with timestamps and actor identifiers
+
