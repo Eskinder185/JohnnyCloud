@@ -9,6 +9,7 @@ import SeverityBadge from "@/components/SeverityBadge";
 import BulkRemediationPreview from "@/components/BulkRemediationPreview";
 import ComplianceTrendChart from "@/components/charts/ComplianceTrendChart";
 import ComplianceChecklist from "@/components/ComplianceChecklist";
+import AskJohnnyCloudVoice from "@/components/AskJohnnyCloudVoice";
 
 export default function GuardrailsPage() {
   const [framework, setFramework] = useState<Framework>("CIS");
@@ -22,7 +23,6 @@ export default function GuardrailsPage() {
   const [bulkControls, setBulkControls] = useState<any[]>([]);
   const [bulkTitle, setBulkTitle] = useState('');
   const [bulkDescription, setBulkDescription] = useState('');
-  const chatApi = import.meta.env.VITE_CHAT_API;
 
   useEffect(() => {
     let on = true;
@@ -34,9 +34,12 @@ export default function GuardrailsPage() {
       .then((d) => { 
         if (on) {
           setData(d); 
-          const firstFail = d.controls.find(c => c.status === "FAIL");
-          if (firstFail) {
-            setSelected(firstFail.id);
+          // Safely check if controls exist before finding
+          if (d && d.controls && Array.isArray(d.controls)) {
+            const firstFail = d.controls.find(c => c.status === "FAIL");
+            if (firstFail) {
+              setSelected(firstFail.id);
+            }
           }
         }
       })
@@ -50,7 +53,7 @@ export default function GuardrailsPage() {
   }, [framework]);
 
   const control = useMemo(
-    () => data?.controls.find(c => c.id === selected) || null,
+    () => (data?.controls && Array.isArray(data.controls)) ? data.controls.find(c => c.id === selected) || null : null,
     [selected, data]
   );
 
@@ -137,6 +140,11 @@ export default function GuardrailsPage() {
     let title = '';
     let description = '';
     
+    // Safely check if data and controls exist
+    if (!data || !data.controls || !Array.isArray(data.controls)) {
+      return;
+    }
+
     switch (controlType) {
       case 's3-public':
         controls = data.controls.filter(c => 
@@ -196,68 +204,29 @@ export default function GuardrailsPage() {
   };
 
   const handleFixControl = (controlId: string) => {
-    const control = data?.controls.find(c => c.id === controlId);
-    if (control) {
-      setSelected(controlId);
-      handleBulkRemediate('selected');
+    if (data?.controls && Array.isArray(data.controls)) {
+      const control = data.controls.find(c => c.id === controlId);
+      if (control) {
+        setSelected(controlId);
+        handleBulkRemediate('selected');
+      }
     }
   };
 
-  async function onAskAssistant() {
-    if (!chatApi || !data) { 
-      alert("Chat API not configured or no data available"); 
-      return; 
-    }
-    
-    try {
-      const payload = {
-        message: `Given this ${data.framework} compliance snapshot (score: ${data.score}%), propose the top 3 remediations and a 1-week improvement plan. Focus on the most critical failing controls.`,
-        mode: "bedrock",
-        sessionId: `guardrails-${framework}-${Date.now()}`,
-        speak: true,
-        voice: "Joanna",
-        guardrailsContext: {
-          framework: data.framework,
-          score: data.score,
-          totals: data.totals,
-          failingControls: data.controls.filter(c => c.status === "FAIL").slice(0, 10).map(c => ({
-            id: c.id,
-            title: c.title,
-            failCount: c.fail,
-            resources: c.resources.length
-          }))
-        }
-      };
-      
-      const response = await fetch(chatApi, { 
-        method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(payload) 
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Chat API error: ${response.status}`);
-      }
-      
-      const result = await response.text();
-      alert(`JohnnyCloud Response:\n\n${result}`);
-    } catch (error) {
-      console.error('Chat API error:', error);
-      alert(`Failed to get assistant response: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <header className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold mb-2">Compliance & Guardrails</h1>
+            <h1 className="text-2xl font-semibold mb-2 jc-title-gradient">Compliance & Guardrails</h1>
             <p className="text-jc-dim text-sm">
               Monitor compliance across security frameworks and manage remediation actions
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-4">
+            {/* Framework Selector */}
             <div className="flex items-center gap-2">
               <label className="text-sm text-jc-dim">Framework:</label>
               <select 
@@ -271,16 +240,13 @@ export default function GuardrailsPage() {
                 <option value="PCI">PCI</option>
               </select>
             </div>
-            <Button 
-              onClick={onAskAssistant} 
-              className="px-4 py-2"
-              disabled={!data}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              Ask JohnnyCloud
-            </Button>
+            
+            {/* Voice Assistant */}
+            <AskJohnnyCloudVoice
+              askEndpoint={`${import.meta.env.VITE_API_BASE}/chat`}
+              context={{ page: "guardrails", framework }}
+              onSent={(q, a) => console.log("Guardrails Q/A:", q, a)}
+            />
           </div>
         </header>
 
@@ -375,7 +341,7 @@ export default function GuardrailsPage() {
               <Button
                 onClick={() => handleBulkRemediate('s3-public')}
                 className="p-4 h-auto flex flex-col items-center gap-2"
-                disabled={!data.controls.some(c => c.id.includes('1.1') || c.title.toLowerCase().includes('s3 public access'))}
+                disabled={!data?.controls || !Array.isArray(data.controls) || !data.controls.some(c => c.id.includes('1.1') || c.title.toLowerCase().includes('s3 public access'))}
               >
                 <div className="text-2xl">🪣</div>
                 <div className="text-sm">Fix S3 Public Access</div>
@@ -385,7 +351,7 @@ export default function GuardrailsPage() {
               <Button
                 onClick={() => handleBulkRemediate('security-groups')}
                 className="p-4 h-auto flex flex-col items-center gap-2"
-                disabled={!data.controls.some(c => c.id.includes('4.1') || c.title.toLowerCase().includes('security group'))}
+                disabled={!data?.controls || !Array.isArray(data.controls) || !data.controls.some(c => c.id.includes('4.1') || c.title.toLowerCase().includes('security group'))}
               >
                 <div className="text-2xl">🔒</div>
                 <div className="text-sm">Fix Security Groups</div>
@@ -395,7 +361,7 @@ export default function GuardrailsPage() {
               <Button
                 onClick={() => handleBulkRemediate('cloudtrail')}
                 className="p-4 h-auto flex flex-col items-center gap-2"
-                disabled={!data.controls.some(c => c.id.includes('3.1') || c.title.toLowerCase().includes('cloudtrail'))}
+                disabled={!data?.controls || !Array.isArray(data.controls) || !data.controls.some(c => c.id.includes('3.1') || c.title.toLowerCase().includes('cloudtrail'))}
               >
                 <div className="text-2xl">📊</div>
                 <div className="text-sm">Fix CloudTrail</div>
@@ -417,7 +383,7 @@ export default function GuardrailsPage() {
           {/* Controls by Status */}
           <div className="grid md:grid-cols-3 gap-6">
             {(["FAIL", "WARN", "PASS"] as const).map(status => {
-              const items = data.controls.filter(c => c.status === status);
+              const items = (data?.controls && Array.isArray(data.controls)) ? data.controls.filter(c => c.status === status) : [];
               const statusInfo = {
                 FAIL: { label: "Failed Controls", color: "border-red-500/30 bg-red-500/10" },
                 WARN: { label: "Warnings", color: "border-amber-500/30 bg-amber-500/10" },

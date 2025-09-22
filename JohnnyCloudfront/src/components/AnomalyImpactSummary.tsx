@@ -39,3 +39,6 @@ export default function AnomalyImpactSummary({ anomaly }: AnomalyImpactSummaryPr
     </div>
   );
 }
+
+
+

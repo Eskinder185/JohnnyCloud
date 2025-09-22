@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         jc: {
+          // Dark theme colors
           bg: '#0B1220',
           surface: '#1A1F2E',
           surface2: '#252B3D',
@@ -16,6 +17,22 @@ export default {
           cyan: '#00E6FF',
           pink: '#EC5DFE',
           green: '#7CFFB2',
+          // Gradient colors for titles and headers
+          'light-blue': '#87CEEB',
+          'light-purple': '#DDA0DD',
+        },
+        // Light theme colors
+        light: {
+          bg: '#FFFFFF',
+          surface: '#F7FAFC',
+          surface2: '#EDF2F7',
+          text: '#1A202C',
+          dim: '#718096',
+          cyan: '#3182CE',
+          pink: '#D53F8C',
+          green: '#38A169',
+          'light-blue': '#3182CE',
+          'light-purple': '#805AD5',
         },
         // Typography color tokens
         text: {

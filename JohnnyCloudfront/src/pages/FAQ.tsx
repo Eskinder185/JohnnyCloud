@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Card } from '../components/ui/Card'
 import { Heading } from '../components/ui/Heading'
 import { Button } from '../components/ui/Button'
-import HoloRadar from '../components/animation/HoloRadar'
 
 interface FAQItem {
   question: string;
@@ -171,8 +170,7 @@ access-control-allow-methods: GET,POST,OPTIONS. Also handle OPTIONS with 204.`,
     id: "faq-env",
     category: "Troubleshooting",
     q: "Which frontend environment variables are required?",
-    a: `Minimum: VITE_CHAT_API, VITE_GUARDRAILS_API, VITE_METRICS_API (or an
-optimize endpoint). Optional: VITE_WHY_AWS_IMAGE (hero), VITE_ABOUT_HERO_IMAGE.
+    a: `Minimum: VITE_API_BASE (base URL for all endpoints). Optional: VITE_WHY_AWS_IMAGE (hero), VITE_ABOUT_HERO_IMAGE.
 Always restart Vite after editing .env.`,
     tags: ["env", "vite"],
   },
@@ -265,12 +263,11 @@ export default function FAQ() {
 
   return (
     <>
-      {/* Security Radar Hero */}
+      {/* Security FAQ Hero */}
       <div className="relative h-56 rounded-2xl overflow-hidden jc-card mb-8">
-        <HoloRadar className="absolute inset-0" />
         <div className="relative p-6">
           <Heading className="text-3xl">Security FAQs</Heading>
-          <p className="text-jc-dim">Scanning… live radar effect.</p>
+          <p className="text-jc-dim">Find answers about cost insights, Guardrails, and setup.</p>
         </div>
       </div>
 

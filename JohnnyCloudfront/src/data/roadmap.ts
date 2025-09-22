@@ -2,38 +2,40 @@
 export interface RoadmapMilestone {
   id: string;
   title: string;
-  description: string;
+  subtitle: string;
+  date: string;
   status: 'completed' | 'current' | 'upcoming';
-  date?: string;
 }
 
 export const ROADMAP_MILESTONES: RoadmapMilestone[] = [
   {
     id: 'v1-foundations',
     title: 'V1 — Foundations',
-    description: 'Landing Zone, Metrics Dashboard',
-    status: 'completed',
-    date: 'Q4 2023'
+    subtitle: 'Landing Zone, Metrics Dashboard',
+    date: 'June 2025',
+    status: 'completed'
   },
   {
     id: 'guardrails',
     title: 'Guardrails',
-    description: 'CIS/NIST controls + auto-remediation',
-    status: 'completed',
-    date: 'Q1 2024'
+    subtitle: 'CIS/NIST controls + auto-remediation',
+    date: 'July 2025',
+    status: 'completed'
   },
   {
     id: 'voice-assistant',
     title: 'Voice Assistant',
-    description: 'Ask Johnny-5, get spoken insights',
-    status: 'current',
-    date: 'Q2 2024'
+    subtitle: 'Ask Johnny-5, get spoken insights',
+    date: 'September 2025',
+    status: 'current'
   },
   {
     id: 'next-phase',
     title: 'Next',
-    description: 'Optimization Hub, multi-account, Slack/Jira',
-    status: 'upcoming',
-    date: 'Q3 2024'
+    subtitle: 'Optimization Hub, multi-account, Slack/Jira',
+    date: 'October 2025',
+    status: 'upcoming'
   }
 ];
+
+

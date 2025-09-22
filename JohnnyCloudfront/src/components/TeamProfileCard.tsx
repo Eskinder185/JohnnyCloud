@@ -89,3 +89,6 @@ export default function TeamProfileCard({ member, index }: TeamProfileCardProps)
     </div>
   );
 }
+
+
+

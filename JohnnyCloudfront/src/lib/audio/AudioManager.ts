@@ -101,6 +101,10 @@ export class AudioManager {
     return this.currentSource;
   }
 
+  getAudioElement(): HTMLAudioElement {
+    return this.audio;
+  }
+
   // Reset to beginning of current audio
   replay(): void {
     if (this.audio && this.currentSource) {

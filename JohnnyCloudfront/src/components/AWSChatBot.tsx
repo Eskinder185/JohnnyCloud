@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import JohnnyBot from '@/components/animation/JohnnyBot';
 import SpeakToggle from '@/components/chat/SpeakToggle';
 import AudioControls from '@/components/chat/AudioControls';
 import StopVoiceButton from '@/components/chat/StopVoiceButton';
+import ClearChatButton from '@/components/chat/ClearChatButton';
 import { 
   setSpeakEnabled,
   setSelectedVoice,
   type VoiceId 
-} from '@/lib/settings';
+} from '@/lib/settingsManager';
 import { sendChat, type ChatMessage } from '@/lib/chatService';
 import { audioManager } from '@/lib/audio/AudioManager';
 import { useWebSpeech } from '@/hooks/useWebSpeech';
@@ -110,19 +111,23 @@ export default function AWSChatBot() {
     }
   }, [listening, interimTranscript]);
 
-  // Speak toggle handler
-  const handleSpeakToggle = (enabled: boolean) => {
+  // Optimized speak toggle handler - batch updates
+  const handleSpeakToggle = useCallback((enabled: boolean) => {
+    // Batch all state updates together
     setSpeakEnabledState(enabled);
-    setSpeakEnabled(enabled);
     chatStore.setSpeakEnabled(enabled);
-  };
+    // Only update settings localStorage once
+    setSpeakEnabled(enabled);
+  }, []);
 
-  // Voice change handler
-  const handleVoiceChange = (voice: VoiceId) => {
+  // Optimized voice change handler - batch updates
+  const handleVoiceChange = useCallback((voice: VoiceId) => {
+    // Batch all state updates together
     setSelectedVoiceState(voice);
-    setSelectedVoice(voice);
     chatStore.setSelectedVoice(voice);
-  };
+    // Only update settings localStorage once
+    setSelectedVoice(voice);
+  }, []);
 
   // Mic button handler
   const handleMicToggle = () => {
@@ -201,6 +206,11 @@ export default function AWSChatBot() {
     }
   };
 
+  const handleClearChat = () => {
+    chatStore.clear();
+    setMessages(chatStore.getState().messages);
+  };
+
   return (
     <Card className="p-8 min-h-[500px] flex flex-col">
       <div className="text-center mb-6">
@@ -213,14 +223,20 @@ export default function AWSChatBot() {
         {/* Direct Bedrock Mode Label */}
         <div className="bg-black/20 rounded-lg p-3 mb-4">
           <div className="text-xs text-jc-dim mb-2">Direct Bedrock via API</div>
-          <div className="flex items-center gap-2">
-            <SpeakToggle 
-              speakEnabled={speakEnabled}
-              onSpeakToggle={handleSpeakToggle}
-              selectedVoice={selectedVoice}
-              onVoiceChange={handleVoiceChange}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SpeakToggle 
+                speakEnabled={speakEnabled}
+                onSpeakToggle={handleSpeakToggle}
+                selectedVoice={selectedVoice}
+                onVoiceChange={handleVoiceChange}
+              />
+              <StopVoiceButton />
+            </div>
+            <ClearChatButton 
+              onClear={handleClearChat} 
+              threadKey="johnnycloud_chat_v2" 
             />
-            <StopVoiceButton />
           </div>
         </div>
       </div>

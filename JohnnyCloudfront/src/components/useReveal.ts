@@ -20,3 +20,6 @@ export function useReveal<T extends HTMLElement>(className = "reveal", delay = 0
   }, [className, delay]);
   return ref;
 }
+
+
+

@@ -17,7 +17,7 @@ export default function Login() {
               Secure access
             </span>
 
-            <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl jc-title-gradient">
               Sign in to{" "}
               <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-fuchsia-400 bg-clip-text text-transparent">
                 JohnnyCloud
@@ -89,7 +89,7 @@ export default function Login() {
             <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-md">
               {/* Replace src with your Johnny-5 image path */}
               <img
-                src="/johnny5_login.png"
+                src="/images/johnny5_login.png"
                 className="h-[460px] w-full object-cover"
                 alt="Johnny-5, ready to help"
                 onError={(e) => {
@@ -106,7 +106,7 @@ export default function Login() {
                 <div>
                   <div className="text-lg font-semibold mb-1">Add your Johnny-5 image</div>
                   <div className="text-sm text-slate-400">
-                    Place a file at <code className="px-1 rounded bg-white/5">/public/johnny5_login.png</code>.
+                    Place a file at <code className="px-1 rounded bg-white/5">/public/images/johnny5_login.png</code>.
                     Use your own render or a licensed photo.
                   </div>
                 </div>

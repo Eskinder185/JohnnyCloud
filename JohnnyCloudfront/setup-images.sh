@@ -7,11 +7,11 @@ echo "Creating .env.local file with image configuration..."
 cat > .env.local << EOF
 # Image Configuration
 # Why AWS Page Images
-VITE_WHY_AWS_IMAGE=/images/why-aws/hero.jpg
-VITE_JC_IMAGE=/images/why-aws/company-logo.jpg
+VITE_WHY_AWS_IMAGE=/images/whyawss.jpg
+VITE_JC_IMAGE=/images/johnny5_login.png
 
 # About Page Images
-VITE_ABOUT_HERO_IMAGE=/images/about/hero.jpg
+VITE_ABOUT_HERO_IMAGE=/images/finsecop.jpg
 EOF
 
 echo
@@ -29,3 +29,6 @@ echo "   3. Visit /why-aws and /about pages to see your images"
 echo
 echo "📖 See IMAGE_SETUP.md for detailed instructions"
 echo
+
+
+

@@ -1,4 +1,5 @@
-const URL = import.meta.env.VITE_METRICS_API;
+const API_BASE = import.meta.env.VITE_API_BASE;
+const URL = `${API_BASE}/metrics`;
 
 export interface MetricsData {
   cost: any;
@@ -30,20 +31,26 @@ export interface MetricsData {
 }
 
 export async function fetchMetrics(): Promise<MetricsData> {
-  const id = sessionStorage.getItem("ID_TOKEN");
-  if (!id) throw new Error("not_authenticated");
-
   const r = await fetch(URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${id}`,
     },
     body: "{}",
   });
   
-  if (r.status === 401) throw new Error("not_authenticated");
-  if (!r.ok) throw new Error(await r.text());
+  if (!r.ok) {
+    const errorText = await r.text();
+    console.error('Metrics API error:', r.status, r.statusText, errorText);
+    throw new Error(`Metrics API failed: ${r.status} ${r.statusText} - ${errorText}`);
+  }
   
-  return r.json();
+  try {
+    return await r.json();
+  } catch (parseError) {
+    console.error('Metrics API JSON parse error:', parseError);
+    const responseText = await r.text();
+    console.error('Response text:', responseText);
+    throw new Error(`Failed to parse metrics response: ${parseError}`);
+  }
 }

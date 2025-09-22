@@ -42,8 +42,11 @@ export async function handleLogin() {
   const challenge = await sha256(verifier);
   sessionStorage.setItem("pkce_verifier", verifier); // needed during token exchange
 
+  // Handle domain that may already include protocol
+  const baseUrl = domain.startsWith("http") ? domain : `https://${domain}`;
+
   const url =
-    `https://${domain}/login` +
+    `${baseUrl}/login` +
     `?client_id=${encodeURIComponent(clientId)}` +
     `&response_type=code` +
     `&scope=${scopes}` +
@@ -63,9 +66,12 @@ export function signOut() {
   localStorage.removeItem("id_token");
   localStorage.removeItem("access_token");
 
+  // Handle domain that may already include protocol
+  const baseUrl = domain.startsWith("http") ? domain : `https://${domain}`;
+
   // Hosted UI logout endpoint requires full https://
   const logoutUrl =
-    `https://${domain}/logout?client_id=${encodeURIComponent(clientId)}` +
+    `${baseUrl}/logout?client_id=${encodeURIComponent(clientId)}` +
     `&logout_uri=${encodeURIComponent(signoutUri)}`;
 
   window.location.href = logoutUrl;

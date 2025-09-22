@@ -229,3 +229,6 @@ If issues persist:
 6. **localStorage**: Verify browser supports localStorage and has permissions
 
 The enhanced error handling and debugging should provide clear information about what's causing the loading issues on both pages.
+
+
+

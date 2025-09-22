@@ -5,13 +5,17 @@ import { TEAM_MEMBERS } from "@/data/team";
 
 // Lazy load heavy components
 const TeamProfileCard = lazy(() => import("@/components/TeamProfileCard"));
-const RoadmapTimeline = lazy(() => import("@/components/RoadmapTimeline"));
+const RoadmapV3 = lazy(() => import("@/components/RoadmapV3"));
 const OriginStory = lazy(() => import("@/components/OriginStory"));
 const SecurityTrust = lazy(() => import("@/components/SecurityTrust"));
 
 const HERO =
   (import.meta.env.VITE_ABOUT_HERO_IMAGE as string) ||
-  "https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?q=80&w=1400";
+  "/images/finsecop.jpg";
+
+// Debug logging for image path
+console.log('🖼️ About Page Image Path:', HERO);
+console.log('🖼️ Environment Variable:', import.meta.env.VITE_ABOUT_HERO_IMAGE);
 
 /* Small card wrapper matching your style */
 const Card = ({ children, className = "" }: any) => (
@@ -30,7 +34,7 @@ export default function AboutPage() {
     <div className="p-6 space-y-12">
       {/* Page Header */}
       <header>
-        <h1 className="text-4xl font-bold text-white mb-2">About JohnnyCloud</h1>
+        <h1 className="text-4xl font-bold jc-title-gradient mb-2">About JohnnyCloud</h1>
         <p className="text-xl text-white/70">
           The team and story behind your AWS FinOps and SecOps companion
         </p>
@@ -39,7 +43,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="grid lg:grid-cols-2 gap-8 items-start">
         <div ref={aboutRef}>
-          <h2 className="text-3xl font-semibold text-white mb-4">Our Mission</h2>
+          <h2 className="text-3xl font-semibold jc-title-gradient mb-4">Our Mission</h2>
           <div className="space-y-4 text-white/80 leading-relaxed">
             <p>
               JohnnyCloud unifies FinOps and SecOps for AWS—continuous optimization insights,
@@ -53,12 +57,25 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <img
-          ref={heroRef}
-          src={HERO}
-          alt="JohnnyCloud team working on AWS solutions"
-          className="w-full h-[320px] md:h-[400px] object-cover rounded-2xl border float-slow"
-        />
+        {/* Hero Image with Overlay */}
+        <div className="relative isolate h-[320px] md:h-[400px] overflow-hidden rounded-2xl border">
+          <img
+            ref={heroRef}
+            src={HERO}
+            alt="JohnnyCloud team working on AWS solutions"
+            className="absolute inset-0 h-full w-full object-cover brightness-[0.65] contrast-110 float-slow"
+          />
+          {/* Gradient overlay for better text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10"></div>
+          
+          {/* Optional overlay content - uncomment if you want text on the image */}
+          {/* <div className="absolute inset-0 flex items-end p-6">
+            <div className="backdrop-blur-subtle bg-black/30 rounded-xl px-4 py-2 inline-block">
+              <h3 className="text-xl font-semibold text-white text-shadow-sm">Team Collaboration</h3>
+              <p className="text-sm text-white/95">Building AWS solutions together</p>
+            </div>
+          </div> */}
+        </div>
       </section>
 
       {/* Origin Story */}
@@ -68,7 +85,7 @@ export default function AboutPage() {
 
       {/* How It Works */}
       <section>
-        <h2 className="text-2xl font-semibold text-white mb-4">How It Works</h2>
+        <h2 className="text-2xl font-semibold jc-title-gradient mb-4">How It Works</h2>
         <p className="text-white/70 mb-6">
           Connect your AWS account, let the AI analyze cost, security, and reliability, then act with safe automations.
         </p>
@@ -102,7 +119,7 @@ export default function AboutPage() {
 
       {/* Roadmap */}
       <Suspense fallback={<div className="h-80 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-        <RoadmapTimeline />
+        <RoadmapV3 />
       </Suspense>
 
       {/* Security Trust */}
@@ -113,7 +130,7 @@ export default function AboutPage() {
       {/* Team Section */}
       <section ref={teamRef}>
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-white mb-2">Our Team</h2>
+          <h2 className="text-2xl font-semibold jc-title-gradient mb-2">Our Team</h2>
           <p className="text-white/70">
             The people behind JohnnyCloud—cloud architecture, security, and product experts.
           </p>

@@ -35,7 +35,8 @@ export interface EvidenceResponse {
   items: any[];
 }
 
-const API = import.meta.env.VITE_GUARDRAILS_API;
+const API_BASE = import.meta.env.VITE_API_BASE;
+const API = `${API_BASE}/guardrails`;
 
 const mock: GuardrailsSummary = {
   framework: "CIS",
@@ -251,9 +252,29 @@ export async function getSummary(framework: Framework = "CIS"): Promise<Guardrai
   }
   
   try {
-    const r = await fetch(`${API}/summary?framework=${framework}`);
-    if (!r.ok) throw new Error(`summary ${r.status}`);
-    return r.json();
+    const r = await fetch(`${API}/summary?framework=${framework}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      mode: "cors",
+    });
+    
+    if (!r.ok) {
+      const errorText = await r.text();
+      console.error('Guardrails API error:', r.status, r.statusText, errorText);
+      throw new Error(`Guardrails API failed: ${r.status} ${r.statusText} - ${errorText}`);
+    }
+    
+    // Check if response is HTML (error page)
+    const contentType = r.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      const htmlText = await r.text();
+      console.error('Guardrails API returned HTML instead of JSON:', htmlText.substring(0, 200));
+      throw new Error('API returned HTML error page instead of JSON');
+    }
+    
+    return await r.json();
   } catch (error) {
     console.error('Guardrails API error:', error);
     // Fallback to mock data on API error
@@ -341,4 +362,7 @@ export async function getEvidence(controlId: string): Promise<EvidenceResponse> 
     };
   }
 }
+
+
+
 

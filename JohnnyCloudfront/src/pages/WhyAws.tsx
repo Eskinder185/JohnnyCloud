@@ -1,20 +1,14 @@
 // src/pages/WhyAws.tsx
 import { useEffect, useState, Suspense, lazy } from "react";
-import { plannerStore } from "@/lib/plannerStore";
-import { useKpiData } from "@/hooks/useKpiData";
-import KpiCard from "@/components/KpiCard";
+import AskJohnnyCloudVoice from "@/components/AskJohnnyCloudVoice";
 
 // Lazy load heavy components
 const InteractiveMigrationPlanner = lazy(() => import("@/components/InteractiveMigrationPlanner"));
-const BusinessImpactStatements = lazy(() => import("@/components/BusinessImpactStatements"));
-const CustomerScenarios = lazy(() => import("@/components/CustomerScenarios"));
-const SavingsCalculator = lazy(() => import("@/components/SavingsCalculator"));
-const ClickableBenefits = lazy(() => import("@/components/ClickableBenefits"));
+const SimpleMigrationPlanner = lazy(() => import("@/components/SimpleMigrationPlanner"));
+const ScenarioCarousel = lazy(() => import("@/components/ScenarioCarousel"));
+const FriendlySavingsCalculator = lazy(() => import("@/components/FriendlySavingsCalculator"));
 
 // ---------- shared UI (matches your sizing/colors) ----------
-const H2 = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="text-3xl font-semibold mb-2">{children}</h2>
-);
 const P = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <p className={`opacity-80 ${className}`}>{children}</p>
 );
@@ -25,214 +19,161 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
 // ---------- env images (hero placeholder) ----------
 const HERO_IMG =
   (import.meta.env.VITE_WHY_AWS_IMAGE as string | undefined) ||
-  (import.meta.env.VITE_JC_IMAGE as string | undefined) ||
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200";
+  "/images/whyawss.jpg";
 
-// ---------- existing value summary helper (optional) ----------
-type ValueSummary = {
-  savings?: { monthlyEstimate?: number };
-  security?: { framework?: string; score?: number | null; topFails?: string[] };
-  reliability?: { backupsPct?: number | null; multiAZPct?: number | null; rto?: string | null; rpo?: string | null };
-  efficiency?: { serverlessPct?: number | null; managedPct?: number | null };
-};
+// Debug logging for image path
+console.log('🖼️ Why AWS Image Path:', HERO_IMG);
+console.log('🖼️ Environment Variable:', import.meta.env.VITE_WHY_AWS_IMAGE);
 
-async function getValueSummary(): Promise<ValueSummary | null> {
-  try {
-    const url = import.meta.env.VITE_GUARDRAILS_API
-      ? `${import.meta.env.VITE_GUARDRAILS_API}/summary?framework=CIS`
-      : "";
-    const cis = url ? await (await fetch(url)).json() : null;
-    return {
-      savings: { monthlyEstimate: undefined }, // keep empty unless you have optimize API wired
-      security: {
-        framework: cis?.framework || "CIS",
-        score: cis?.score ?? null,
-        topFails: (cis?.controls || []).filter((c: any) => c.status === "FAIL").slice(0, 3).map((c: any) => c.id),
-      },
-      reliability: { backupsPct: null, multiAZPct: null, rto: null, rpo: null },
-      efficiency: { serverlessPct: null, managedPct: null },
-    };
-  } catch {
-    return null;
-  }
-}
 
 // ---------- page ----------
 export default function WhyAwsPage() {
-  const [value, setValue] = useState<ValueSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [plannerInput] = useState(plannerStore.getInput());
-  const chatApi = import.meta.env.VITE_CHAT_API as string | undefined;
-  const kpiData = useKpiData();
+  const [plannerMode, setPlannerMode] = useState<'simple' | 'advanced'>(() => {
+    // Check localStorage for persisted mode
+    const saved = localStorage.getItem('whyaws_planner_mode_v1');
+    return (saved === 'simple' || saved === 'advanced') ? saved : 'simple';
+  });
 
+  // Persist planner mode to localStorage
   useEffect(() => {
-    let on = true;
-    (async () => {
-      setLoading(true);
-      const v = await getValueSummary();
-      if (on) setValue(v);
-      setLoading(false);
-    })();
-    return () => { on = false; };
+    localStorage.setItem('whyaws_planner_mode_v1', plannerMode);
+  }, [plannerMode]);
+
+  // Handle URL deep linking for planner mode
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    if (mode === 'simple' || mode === 'advanced') {
+      setPlannerMode(mode);
+    }
   }, []);
 
-  async function ask(payload: any) {
-    if (!chatApi) return alert("VITE_CHAT_API not set");
-    const body = {
-      threadId: "whyaws::default",
-      message: "Summarize business value and refine the migration plan.",
-      speak: true, voice: "Joanna",
-      valueContext: value ?? {},
-      ...payload
-    };
-    const r = await fetch(chatApi, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const j = await r.json();
-    alert(j.reply ?? "Sent.");
-  }
+  const handlePlannerModeChange = (mode: 'simple' | 'advanced') => {
+    setPlannerMode(mode);
+    // Update URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', mode);
+    window.history.replaceState({}, '', url.toString());
+  };
 
 
   return (
     <div className="p-6 space-y-12">
-      {/* Hero row */}
-      <section className="grid lg:grid-cols-2 gap-8 items-start">
-        <div>
-          <H2>Why AWS</H2>
-          <P>See cost savings, security posture, reliability readiness, and efficiency—calculated from your account.</P>
+      {/* Hero Section */}
+      <section className="grid lg:grid-cols-5 gap-8 items-start">
+        <div className="lg:col-span-3">
+          <h1 className="text-4xl font-bold jc-title-gradient mb-4">Why AWS</h1>
+          <P className="text-lg">
+            Plan your cloud migration with confidence. Get realistic timelines, effort estimates, 
+            and AWS service recommendations tailored to your workload.
+          </P>
           
-          {/* Clickable Benefits */}
+          {/* Voice Assistant */}
           <div className="mt-6">
-            <Suspense fallback={<div className="h-32 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-              <ClickableBenefits />
-            </Suspense>
-          </div>
-          
-          <div className="mt-6 flex gap-2">
-            <a href="/metrics" className="px-4 py-2 rounded bg-black text-white">Open Optimization Hub</a>
-            <a href="/guardrails" className="px-4 py-2 rounded border hover:bg-white/5">Open Guardrails</a>
-            <button onClick={() => ask({})} className="px-4 py-2 rounded border hover:bg-white/5">Ask JohnnyCloud</button>
+            <AskJohnnyCloudVoice
+              askEndpoint={`${import.meta.env.VITE_API_BASE}/chat`}
+              context={{ page: "why-aws" }}
+              onSent={(q, a) => console.log("Why AWS Q/A:", q, a)}
+            />
           </div>
         </div>
 
-        {/* hero image placeholder */}
-        <img src={HERO_IMG} alt="JohnnyCloud" className="w-full h-[320px] object-cover rounded-2xl border" />
-      </section>
-
-      {/* KPI Cards */}
-      <section className="grid md:grid-cols-4 gap-4">
-        <KpiCard
-          title="Estimated Savings / mo"
-          value={kpiData.savings.monthlyEstimate ? 
-            kpiData.savings.monthlyEstimate.toLocaleString(undefined, {
-              style: "currency", 
-              currency: "USD", 
-              maximumFractionDigits: 0
-            }) : null}
-          subtitle="Rightsizing + idle + storage transitions"
-          loading={kpiData.savings.loading}
-          error={kpiData.savings.error}
-          emptyState={{
-            message: "No savings recorded yet",
-            cta: {
-              text: "Open Optimization Hub",
-              href: "/metrics",
-              analyticsEvent: "whyaws.kpi.savings.cta.clicked"
-            }
-          }}
-        />
-        
-        <KpiCard
-          title="Security Posture (CIS)"
-          value={kpiData.security.score ? `${kpiData.security.score}%` : null}
-          subtitle={kpiData.security.topFails.length > 0 ? 
-            `Top fails: ${kpiData.security.topFails.join(", ")}` : 
-            "All controls passing"}
-          loading={kpiData.security.loading}
-          error={kpiData.security.error}
-          emptyState={{
-            message: "Enable Security Hub in us-east-1",
-            cta: {
-              text: "View setup guide",
-              href: "/guardrails",
-              analyticsEvent: "whyaws.kpi.security.cta.clicked"
-            }
-          }}
-        />
-        
-        <KpiCard
-          title="Reliability"
-          value={kpiData.reliability.backupCoverage ? 
-            `${kpiData.reliability.backupCoverage}% backups` : null}
-          subtitle={kpiData.reliability.multiAZCoverage ? 
-            `Multi-AZ: ${kpiData.reliability.multiAZCoverage}%` : 
-            "Multi-AZ coverage"}
-          loading={kpiData.reliability.loading}
-          error={kpiData.reliability.error}
-          emptyState={{
-            message: "No backup telemetry found",
-            cta: {
-              text: "Open Guardrails",
-              href: "/guardrails?filter=reliability",
-              analyticsEvent: "whyaws.kpi.reliability.cta.clicked"
-            }
-          }}
-        />
-        
-        <KpiCard
-          title="Efficiency"
-          value={kpiData.efficiency.serverlessPct ? 
-            `${kpiData.efficiency.serverlessPct}% serverless` : null}
-          subtitle={kpiData.efficiency.managedPct ? 
-            `Managed services: ${kpiData.efficiency.managedPct}% of compute` : 
-            "Managed services usage"}
-          loading={kpiData.efficiency.loading}
-          error={kpiData.efficiency.error}
-          emptyState={{
-            message: "We couldn't detect managed usage yet",
-            cta: {
-              text: "Open Optimization Hub",
-              href: "/metrics?filter=compute",
-              analyticsEvent: "whyaws.kpi.efficiency.cta.clicked"
-            }
-          }}
-        />
-      </section>
-
-      {/* Interactive Migration Planner */}
-      <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-        <InteractiveMigrationPlanner onAsk={ask} />
-      </Suspense>
-
-      {/* Business Impact Statements */}
-      <Suspense fallback={<div className="h-64 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-        <BusinessImpactStatements input={plannerInput} />
-      </Suspense>
-
-      {/* Customer Scenarios */}
-      <Suspense fallback={<div className="h-80 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-        <CustomerScenarios />
-      </Suspense>
-
-      {/* Savings Calculator */}
-      <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl border animate-pulse"></div>}>
-        <SavingsCalculator />
-      </Suspense>
-
-      {/* Narrative */}
-      <Card>
-        <H2>What this means</H2>
-        <ul className="list-disc list-inside text-sm opacity-90 space-y-1">
-          <li>Costs: estimated savings if you act on current recommendations.</li>
-          <li>Security: CIS score—focus on your top failing controls.</li>
-          <li>Reliability: target RTO/RPO; ensure backups & multi-AZ.</li>
-          <li>Efficiency: increase serverless & managed services to reduce ops toil.</li>
-        </ul>
-      </Card>
-
-      {!loading && !value && (
-        <div className="rounded-2xl border p-5 text-sm opacity-80">
-          No account context yet. Set <code>VITE_GUARDRAILS_API</code> (and metrics/optimize if available).
+        {/* Hero Image with Overlay - 16:9 ratio, rounded corners, soft shadow */}
+        <div className="lg:col-span-2">
+          <div className="relative isolate aspect-video overflow-hidden rounded-2xl border shadow-lg">
+            <img 
+              src={HERO_IMG} 
+              alt="Cloud migration illustration" 
+              className="absolute inset-0 h-full w-full object-cover brightness-[0.7] contrast-110"
+              loading="lazy"
+            />
+            {/* Gradient overlay for better text contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+            
+            {/* Optional overlay content - uncomment if you want text on the image */}
+            {/* <div className="absolute inset-0 flex items-end p-6">
+              <div className="text-white [text-shadow:_0_1px_3px_rgba(0,0,0,.55)]">
+                <h3 className="text-xl font-semibold">Cloud Migration</h3>
+                <p className="text-sm opacity-95">Plan your AWS journey with confidence</p>
+              </div>
+            </div> */}
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Migration Planner Section */}
+      <section>
+        <Card>
+          {/* Planner Mode Toggle */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-semibold mb-2 jc-title-gradient">
+                {plannerMode === 'simple' ? 'Quick Migration Estimator' : 'Advanced Migration Planner'}
+              </h2>
+              <p className="opacity-80">
+                {plannerMode === 'simple' 
+                  ? 'Get a quick estimate of your migration timeline and effort'
+                  : 'Interactive migration planning with detailed timeline and resource allocation'
+                }
+              </p>
+            </div>
+            
+            {/* Segmented Control */}
+            <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+              <button
+                onClick={() => handlePlannerModeChange('simple')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  plannerMode === 'simple'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                aria-label="Switch to Simple mode"
+              >
+                Simple
+              </button>
+              <button
+                onClick={() => handlePlannerModeChange('advanced')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  plannerMode === 'advanced'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+                aria-label="Switch to Advanced mode"
+              >
+                Advanced
+              </button>
+            </div>
+          </div>
+
+          {/* Planner Content */}
+          <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl border animate-pulse"></div>}>
+            {plannerMode === 'simple' ? (
+              <SimpleMigrationPlanner />
+            ) : (
+              <InteractiveMigrationPlanner onAsk={() => {}} />
+            )}
+          </Suspense>
+        </Card>
+      </section>
+
+      {/* Scenario Carousel Section */}
+      <section>
+        <Card>
+          <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl border animate-pulse"></div>}>
+            <ScenarioCarousel />
+          </Suspense>
+        </Card>
+      </section>
+
+      {/* Savings Calculator Section */}
+      <section>
+        <Card>
+          <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl border animate-pulse"></div>}>
+            <FriendlySavingsCalculator />
+          </Suspense>
+        </Card>
+      </section>
+
     </div>
   );
 }

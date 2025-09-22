@@ -167,3 +167,5 @@ copy env.example .env.local
 4. Configure AWS Identity Pool with appropriate permissions
 5. Set up Lex bot if needed for advanced voice interactions
 
+
+

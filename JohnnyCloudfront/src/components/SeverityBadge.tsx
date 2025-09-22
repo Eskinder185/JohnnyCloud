@@ -40,3 +40,6 @@ export default function SeverityBadge({
 
   return badge;
 }
+
+
+

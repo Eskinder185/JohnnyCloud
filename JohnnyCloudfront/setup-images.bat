@@ -5,11 +5,11 @@ echo.
 echo Creating .env.local file with image configuration...
 echo # Image Configuration > .env.local
 echo # Why AWS Page Images >> .env.local
-echo VITE_WHY_AWS_IMAGE=/images/why-aws/hero.jpg >> .env.local
-echo VITE_JC_IMAGE=/images/why-aws/company-logo.jpg >> .env.local
+echo VITE_WHY_AWS_IMAGE=/images/whyawss.jpg >> .env.local
+echo VITE_JC_IMAGE=/images/johnny5_login.png >> .env.local
 echo. >> .env.local
 echo # About Page Images >> .env.local
-echo VITE_ABOUT_HERO_IMAGE=/images/about/hero.jpg >> .env.local
+echo VITE_ABOUT_HERO_IMAGE=/images/finsecop.jpg >> .env.local
 
 echo.
 echo ✅ Image configuration created in .env.local
@@ -27,3 +27,6 @@ echo.
 echo 📖 See IMAGE_SETUP.md for detailed instructions
 echo.
 pause
+
+
+

@@ -166,3 +166,6 @@ function getQuickWinRationale(controlId: string, title: string, failCount: numbe
   
   return `This control affects ${failCount} resource${failCount !== 1 ? 's' : ''} and has ${exposureWeight === 3 ? 'high' : exposureWeight === 2 ? 'medium' : 'low'} exposure risk.`;
 }
+
+
+

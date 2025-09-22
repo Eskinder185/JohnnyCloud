@@ -1,4 +1,5 @@
-import { setSpeakEnabled, setSelectedVoice, type VoiceId } from '@/lib/settings';
+import { useCallback } from 'react';
+import { setSpeakEnabled, setSelectedVoice, type VoiceId } from '@/lib/settingsManager';
 
 interface SpeakToggleProps {
   speakEnabled: boolean;
@@ -15,16 +16,29 @@ export default function SpeakToggle({
 }: SpeakToggleProps) {
   const voices: VoiceId[] = ["Joanna", "Matthew", "Ivy", "Salli", "Justin"];
 
+  // Debounced handlers to prevent multiple rapid updates
+  const handleSpeakToggle = useCallback(() => {
+    const newEnabled = !speakEnabled;
+    // Batch the updates - let the parent handle localStorage
+    onSpeakToggle(newEnabled);
+    // Only update settings if parent doesn't handle it
+    setSpeakEnabled(newEnabled);
+  }, [speakEnabled, onSpeakToggle]);
+
+  const handleVoiceChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const voice = e.target.value as VoiceId;
+    // Batch the updates - let the parent handle localStorage
+    onVoiceChange(voice);
+    // Only update settings if parent doesn't handle it
+    setSelectedVoice(voice);
+  }, [onVoiceChange]);
+
   return (
     <div className="flex items-center gap-3">
       {/* Speak Toggle */}
       <div className="flex items-center gap-2">
         <button
-          onClick={() => {
-            const newEnabled = !speakEnabled;
-            onSpeakToggle(newEnabled);
-            setSpeakEnabled(newEnabled);
-          }}
+          onClick={handleSpeakToggle}
           className={`flex items-center gap-1 px-3 py-1 rounded text-xs transition-colors ${
             speakEnabled 
               ? 'bg-jc-cyan/20 text-jc-cyan hover:bg-jc-cyan/30' 
@@ -43,11 +57,7 @@ export default function SpeakToggle({
           <label className="text-xs text-jc-dim">Voice:</label>
           <select
             value={selectedVoice}
-            onChange={(e) => {
-              const voice = e.target.value as VoiceId;
-              onVoiceChange(voice);
-              setSelectedVoice(voice);
-            }}
+            onChange={handleVoiceChange}
             className="bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-jc-cyan"
           >
             {voices.map((voice) => (

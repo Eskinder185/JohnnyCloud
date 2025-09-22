@@ -97,3 +97,6 @@ const extractArray = (data: any, fallback: any[] = []): any[] => {
 anomalies: extractArray(json.anomalies),
 securityFindings: extractArray(json.securityFindings),
 ```
+
+
+

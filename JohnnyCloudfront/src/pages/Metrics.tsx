@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/Skeleton";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { getJwt, isLoggedIn } from "@/lib/auth";
 import { formatCurrency } from "@/lib/metricsUtils";
+import { MetricsFallback } from "@/components/FallbackContent";
+import { cachedFetch } from "@/lib/apiCache";
 
 // Lazy load chart components
 const SpendTrendChart = lazy(() => import("@/components/charts/SpendTrendChart"));
@@ -93,7 +95,7 @@ export default function Metrics() {
       console.log('Fetching metrics from:', apiUrl);
       console.log('Time range:', timeRange, 'Data source:', dataSource);
       
-      const res = await fetch(apiUrl, {
+      const res = await cachedFetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +103,7 @@ export default function Metrics() {
           "Accept": "application/json",
         },
         body: JSON.stringify({ timeRange, dataSource }),
-      });
+      }, 2 * 60 * 1000); // Cache for 2 minutes
 
       console.log('Response status:', res.status, res.statusText);
 
@@ -121,6 +123,8 @@ export default function Metrics() {
       console.log('Received data:', json);
       console.log('Anomalies structure:', json.anomalies);
       console.log('SecurityFindings structure:', json.securityFindings);
+      console.log('Meta structure:', json.meta);
+      console.log('Security Hub enabled:', json.meta?.securityHubEnabled);
       
       // Validate data structure
       if (!json || typeof json !== 'object') {
@@ -164,6 +168,10 @@ export default function Metrics() {
         }
       };
       
+      // Temporary override for testing - remove this after fixing the backend
+      // Uncomment the next line to force Security Hub as enabled for testing
+      // validatedData.meta.securityHubEnabled = true;
+      
       console.log('Validated anomalies:', validatedData.anomalies);
       console.log('Validated securityFindings:', validatedData.securityFindings);
       setData(validatedData);
@@ -182,6 +190,26 @@ export default function Metrics() {
   const onRefresh = () => {
     fetchData();
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <PageShell variant="none">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        </div>
+      </PageShell>
+    );
+  }
+
+  // Show error state with fallback
+  if (error) {
+    return (
+      <PageShell variant="none">
+        <MetricsFallback onRetry={onRefresh} />
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell variant="none">

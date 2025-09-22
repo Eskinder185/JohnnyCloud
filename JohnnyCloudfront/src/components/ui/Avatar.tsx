@@ -44,3 +44,6 @@ export default function Avatar({ name, imageUrl, size = 'md', className = '' }: 
     </div>
   );
 }
+
+
+

@@ -150,3 +150,6 @@ export function generateFindingsCSV(findings: any[]): void {
   const filename = `johnnycloud_findings_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.csv`;
   downloadCSV(findings, filename, columns);
 }
+
+
+

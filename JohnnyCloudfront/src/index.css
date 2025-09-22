@@ -2,11 +2,254 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* Typographic Scale - Dark UI */
+@layer base {
+  /* Desktop (≥1280px) */
+  .text-overline {
+    @apply text-sm font-semibold leading-[120%];
+  }
+  
+  .text-hero {
+    @apply text-[40px] font-bold leading-[115%];
+  }
+  
+  .text-subhead {
+    @apply text-lg font-medium leading-[150%] max-w-[640px];
+  }
+  
+  .text-section-title {
+    @apply text-[28px] font-bold leading-[120%];
+  }
+  
+  .text-card-title {
+    @apply text-xl font-semibold leading-[130%];
+  }
+  
+  .text-body {
+    @apply text-base font-normal leading-[160%];
+  }
+  
+  .text-small {
+    @apply text-sm font-medium leading-[150%];
+  }
+  
+  .text-button {
+    @apply text-sm font-semibold leading-[120%] tracking-[0.02em];
+  }
+  
+  /* Color utility classes */
+  .text-primary {
+    color: var(--color-primary);
+  }
+  
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  
+  .text-muted {
+    color: var(--color-muted);
+  }
+  
+  .text-link {
+    color: var(--color-link);
+  }
+  
+  .text-link:hover {
+    color: var(--color-link-hover);
+  }
+  
+  /* Tablet (768–1279px) */
+  @media (max-width: 1279px) {
+    .text-hero {
+      @apply text-[36px];
+    }
+    
+    .text-section-title {
+      @apply text-2xl;
+    }
+    
+    .text-card-title {
+      @apply text-lg;
+    }
+    
+    .text-small {
+      @apply text-[13px];
+    }
+  }
+  
+  /* Mobile (<768px) */
+  @media (max-width: 767px) {
+    .text-hero {
+      @apply text-[30px];
+    }
+    
+    .text-section-title {
+      @apply text-[22px];
+    }
+    
+    .text-card-title {
+      @apply text-lg;
+    }
+    
+    .text-body {
+      @apply text-[15px];
+    }
+    
+    .text-small {
+      @apply text-xs;
+    }
+  }
+}
+
+:root { 
+  color-scheme: dark; 
+  
+  /* Kill old page backgrounds - set neutral base */
+  --bg-0: #0b1220;       /* AWS dark navy */
+  --bg-1: #111a2e;
+  --accent-cost: #19c37d;     /* cost = green */
+  --accent-security: #38bdf8; /* security = blue/cyan */
+  --accent-alert: #f59e0b;    /* amber for minor alerts */
+  --accent-critical: #ef4444;  /* red for critical */
+  
+  /* Dark theme color tokens */
+  --color-primary: #E6F1FF;
+  --color-secondary: #B5C7DB;
+  --color-muted: #8EA0B5;
+  --color-link: #7FD1FF;
+  --color-link-hover: #A7E3FF;
+  --color-bg: #0B1220;
+  --color-surface: #1A1F2E;
+  --color-surface2: #252B3D;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-hover: rgba(255, 255, 255, 0.2);
+  
+  /* Tile color tokens - Dark theme */
+  --tile-metrics-bg: rgba(59, 130, 246, 0.12);
+  --tile-metrics-border: rgba(59, 130, 246, 0.2);
+  --tile-metrics-glow: rgba(59, 130, 246, 0.5);
+  
+  --tile-guardrails-bg: rgba(34, 197, 94, 0.12);
+  --tile-guardrails-border: rgba(34, 197, 94, 0.2);
+  --tile-guardrails-glow: rgba(34, 197, 94, 0.5);
+  
+  --tile-cost-bg: rgba(168, 85, 247, 0.12);
+  --tile-cost-border: rgba(168, 85, 247, 0.2);
+  --tile-cost-glow: rgba(168, 85, 247, 0.5);
+  
+  /* Roadmap color tokens - Dark theme */
+  --roadmap-rail: rgba(255, 255, 255, 0.15);
+  --roadmap-rail-progress: #22C55E;
+  --roadmap-node-completed: #22C55E;
+  --roadmap-node-current: #3B82F6;
+  --roadmap-node-upcoming: rgba(255, 255, 255, 0.3);
+  --roadmap-card: #1E293B;
+  --roadmap-card-foreground: #F1F5F9;
+  --roadmap-legend-muted: #94A3B8;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-0);
+  color: #e5e7eb;
+  overflow-x: hidden;
+}
+
+/* ensure app content sits above the canvas */
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+/* accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .global-bg--animated { display: none; }
+  body { background: linear-gradient(180deg, var(--bg-0), var(--bg-1)); }
+}
+
+/* Image overlay utilities for better text contrast */
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  
+  .text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  }
+  
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+  }
+  
+  .backdrop-blur-subtle {
+    backdrop-filter: blur(2px);
+  }
+  
+  .backdrop-blur-medium {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Light theme */
+.light {
+  color-scheme: light;
+  /* Light theme color tokens */
+  --color-primary: #1A202C;
+  --color-secondary: #4A5568;
+  --color-muted: #718096;
+  --color-link: #3182CE;
+  --color-link-hover: #2C5282;
+  --color-bg: #FFFFFF;
+  --color-surface: #F7FAFC;
+  --color-surface2: #EDF2F7;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-hover: rgba(0, 0, 0, 0.2);
+  
+  /* Tile color tokens - Light theme */
+  --tile-metrics-bg: rgba(59, 130, 246, 0.08);
+  --tile-metrics-border: rgba(59, 130, 246, 0.16);
+  --tile-metrics-glow: rgba(59, 130, 246, 0.4);
+  
+  --tile-guardrails-bg: rgba(34, 197, 94, 0.08);
+  --tile-guardrails-border: rgba(34, 197, 94, 0.16);
+  --tile-guardrails-glow: rgba(34, 197, 94, 0.4);
+  
+  --tile-cost-bg: rgba(168, 85, 247, 0.08);
+  --tile-cost-border: rgba(168, 85, 247, 0.16);
+  --tile-cost-glow: rgba(168, 85, 247, 0.4);
+  
+  /* Roadmap color tokens - Light theme */
+  --roadmap-rail: rgba(0, 0, 0, 0.15);
+  --roadmap-rail-progress: #22C55E;
+  --roadmap-node-completed: #22C55E;
+  --roadmap-node-current: #3B82F6;
+  --roadmap-node-upcoming: rgba(0, 0, 0, 0.3);
+  --roadmap-card: #FFFFFF;
+  --roadmap-card-foreground: #1E293B;
+  --roadmap-legend-muted: #64748B;
+  
+  /* Background System tokens - Light theme */
+  --bg-overlay-opacity: 0.05;
+  --bg-overlay-brightness: 1.1;
+  --bg-overlay-contrast: 0.9;
+  --bg-vignette-strength: 0.2;
+}
+
 html, body, #root { height: 100%; }
 body { 
-  @apply bg-[color:theme(colors.jc.bg)] text-text-primary font-sans; 
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Pause animations when tab is not visible or user prefers reduced motion */
@@ -15,6 +258,76 @@ body {
 .animations-paused *::after {
   animation-play-state: paused !important;
 }
+
+/* Theme-aware utility classes */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-muted { color: var(--color-muted); }
+.text-link { color: var(--color-link); }
+.text-link-hover:hover { color: var(--color-link-hover); }
+
+.bg-primary { background-color: var(--color-bg); }
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface2 { background-color: var(--color-surface2); }
+
+.border-primary { border-color: var(--color-border); }
+.border-primary-hover:hover { border-color: var(--color-border-hover); }
+
+/* Line clamp utility for text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+/* Tile color utilities */
+.tile-metrics {
+  --tile-bg: var(--tile-metrics-bg);
+  --tile-border: var(--tile-metrics-border);
+  --tile-glow: var(--tile-metrics-glow);
+  --tile-accent: #3B82F6;
+}
+
+.tile-guardrails {
+  --tile-bg: var(--tile-guardrails-bg);
+  --tile-border: var(--tile-guardrails-border);
+  --tile-glow: var(--tile-guardrails-glow);
+  --tile-accent: #22C55E;
+}
+
+.tile-cost {
+  --tile-bg: var(--tile-cost-bg);
+  --tile-border: var(--tile-cost-border);
+  --tile-glow: var(--tile-cost-glow);
+  --tile-accent: #A855F7;
+}
+
+/* Motion reduction utility */
+.motion-reduce\:transform-none {
+  transform: none !important;
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .tile-metrics:hover,
+  .tile-guardrails:hover,
+  .tile-cost:hover {
+    transform: none !important;
+  }
+}
+
+/* Roadmap utility classes */
+.roadmap-rail { background-color: var(--roadmap-rail); }
+.roadmap-rail-progress { background-color: var(--roadmap-rail-progress); }
+.roadmap-node-completed { background-color: var(--roadmap-node-completed); }
+.roadmap-node-current { background-color: var(--roadmap-node-current); }
+.roadmap-node-upcoming { border-color: var(--roadmap-node-upcoming); }
+.roadmap-card { 
+  background-color: var(--roadmap-card);
+  color: var(--roadmap-card-foreground);
+}
+.roadmap-legend-muted { color: var(--roadmap-legend-muted); }
 
 /* Legacy background styles removed - using static dark background */
 
@@ -32,6 +345,40 @@ body {
   filter: blur(0.25px);
 }
 
+/* Roadmap Timeline Keyframes */
+@keyframes roadmap-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4);
+  }
+}
+
+@keyframes roadmap-flow {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes roadmap-bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 /* JohnnyCloud utility classes */
 @layer utilities {
   .jc-card {
@@ -44,6 +391,57 @@ body {
   
   .jc-heading {
     @apply bg-gradient-to-r from-jc-cyan via-jc-pink to-jc-green bg-clip-text text-transparent;
+  }
+  
+  .jc-title-gradient {
+    @apply bg-gradient-to-r from-jc-light-blue to-jc-light-purple bg-clip-text text-transparent;
+  }
+
+  /* Custom slider styling */
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #06b6d4;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #06b6d4;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Roadmap Timeline Animations */
+  .roadmap-dot-glow {
+    animation: roadmap-glow 2s ease-in-out infinite alternate;
+  }
+  
+  .roadmap-line-flow {
+    background: linear-gradient(90deg, 
+      rgba(0,255,255,0) 0%, 
+      rgba(0,255,255,0.5) 25%, 
+      rgba(0,255,255,1) 50%, 
+      rgba(0,255,255,0.5) 75%, 
+      rgba(0,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: roadmap-flow 3s ease-in-out infinite;
+  }
+  
+  .roadmap-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .roadmap-card-hover:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
   }
   
   .jc-chip {

@@ -119,6 +119,17 @@ export class ChatStore {
     this.saveToStorage();
   }
 
+  // Batch update for settings to reduce localStorage operations
+  updateSettings(updates: { speakEnabled?: boolean; selectedVoice?: string }) {
+    if (updates.speakEnabled !== undefined) {
+      this.state.speakEnabled = updates.speakEnabled;
+    }
+    if (updates.selectedVoice !== undefined) {
+      this.state.selectedVoice = updates.selectedVoice;
+    }
+    this.saveToStorage();
+  }
+
   clear() {
     this.state = {
       messages: [{

@@ -7,7 +7,7 @@ interface HeadingProps {
 
 export function Heading({ children, className = '' }: HeadingProps) {
   return (
-    <h1 className={`jc-heading ${className}`}>
+    <h1 className={`jc-title-gradient ${className}`}>
       {children}
     </h1>
   )

@@ -5,3 +5,6 @@ VITE_JC_IMAGE=/images/why-aws/johnnycloud-company-logo.jpg
 
 # About Page Images
 VITE_ABOUT_HERO_IMAGE=/images/about/about-hero-team-office.jpg
+
+
+

@@ -22,9 +22,27 @@ export default function AudioControls({ audio, onError }: AudioControlsProps) {
       setIsPlaying(!!(audioManager.isPlaying() && isCurrentAudio));
     };
 
+    // Initial check
     checkPlaying();
-    const interval = setInterval(checkPlaying, 100);
-    return () => clearInterval(interval);
+    
+    // Use event-driven updates instead of polling
+    const handleAudioStateChange = () => {
+      checkPlaying();
+    };
+
+    // Listen for audio events instead of polling
+    const audioElement = audioManager.getAudioElement();
+    if (audioElement) {
+      audioElement.addEventListener('play', handleAudioStateChange);
+      audioElement.addEventListener('pause', handleAudioStateChange);
+      audioElement.addEventListener('ended', handleAudioStateChange);
+      
+      return () => {
+        audioElement.removeEventListener('play', handleAudioStateChange);
+        audioElement.removeEventListener('pause', handleAudioStateChange);
+        audioElement.removeEventListener('ended', handleAudioStateChange);
+      };
+    }
   }, [audio]);
 
   const handlePlay = async () => {
