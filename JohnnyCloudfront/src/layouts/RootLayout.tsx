@@ -1,15 +1,12 @@
 import { Outlet } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import BackgroundManager from "@/components/background/BackgroundManager";
-import { useMetricsSignal } from "@/hooks/useMetricsSignal";
 
 export default function RootLayout() {
-  const signal = useMetricsSignal();
-
   return (
     <div className="min-h-dvh relative">
       {/* Background System */}
-      <BackgroundManager signal={signal} />
+      <BackgroundManager />
 
       {/* Smart Header with conditional login */}
       <Header />

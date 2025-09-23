@@ -42,10 +42,10 @@ export default function AWSChatBot() {
     listening, 
     interimTranscript, 
     finalTranscript, 
-    start: startListening, 
-    stop: stopListening, 
     isSupported: micSupported,
-    error: micError 
+    error: micError,
+    startPushToTalk,
+    stopPushToTalk
   } = useWebSpeech();
 
   const scrollToBottom = () => {
@@ -129,16 +129,16 @@ export default function AWSChatBot() {
     setSelectedVoice(voice);
   }, []);
 
-  // Mic button handler
-  const handleMicToggle = () => {
-    if (listening) {
-      stopListening();
-    } else {
-      // Clear any previous mic errors and stop any playing audio
-      setMicErrorState(null);
-      audioManager.stop();
-      startListening();
-    }
+  // Push-to-talk handlers
+  const handleMicPress = () => {
+    // Clear any previous mic errors and stop any playing audio
+    setMicErrorState(null);
+    audioManager.stop();
+    startPushToTalk();
+  };
+
+  const handleMicRelease = () => {
+    stopPushToTalk();
   };
 
 
@@ -218,6 +218,9 @@ export default function AWSChatBot() {
         <h3 className="text-xl font-semibold mb-2">How can I help?</h3>
         <p className="text-jc-dim text-sm mb-4">
           Ask me anything about your AWS infrastructure
+        </p>
+        <p className="text-jc-dim text-xs mb-4">
+          💡 Hold the mic button to speak, release to send
         </p>
         
         {/* Direct Bedrock Mode Label */}
@@ -334,12 +337,32 @@ export default function AWSChatBot() {
 
       {/* Chat Input */}
       <div className="flex gap-2">
-        {/* Mic Button */}
+        {/* Push-to-Talk Mic Button */}
         <button
-          onClick={handleMicToggle}
-          className={`px-3 py-2 rounded-lg transition-colors ${listening ? 'bg-jc-cyan/20 text-jc-cyan animate-pulse' : 'bg-white/10 text-jc-dim hover:bg-white/20 hover:text-white'}`}
+          onMouseDown={handleMicPress}
+          onMouseUp={handleMicRelease}
+          onMouseLeave={handleMicRelease}
+          onTouchStart={(e) => { e.preventDefault(); handleMicPress(); }}
+          onTouchEnd={(e) => { e.preventDefault(); handleMicRelease(); }}
+          onKeyDown={(e) => { 
+            if (e.code === "Space" && !e.repeat) { 
+              e.preventDefault(); 
+              handleMicPress(); 
+            } 
+          }}
+          onKeyUp={(e) => { 
+            if (e.code === "Space") { 
+              e.preventDefault(); 
+              handleMicRelease(); 
+            } 
+          }}
+          className={`px-3 py-2 rounded-lg transition-all duration-200 transform ${
+            listening 
+              ? 'bg-jc-cyan/20 text-jc-cyan scale-110 shadow-lg shadow-jc-cyan/50' 
+              : 'bg-white/10 text-jc-dim hover:bg-white/20 hover:text-white hover:scale-105'
+          }`}
           disabled={!micSupported || isTyping}
-          title={listening ? "Stop listening" : "Speak your message"}
+          title={listening ? "Release to send" : "Hold to speak"}
         >
           {listening ? (
             <div className="flex items-center gap-1">
@@ -356,7 +379,7 @@ export default function AWSChatBot() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={listening ? "Listening..." : "Ask Johnny-5 anything..."}
+          placeholder={listening ? "Listening... Release to send" : "Ask Johnny-5 anything or hold mic to speak..."}
           className="flex-1 bg-white/5 border border-white/10 rounded-lg p-3 focus-glow text-white placeholder-jc-dim"
           disabled={isTyping}
         />

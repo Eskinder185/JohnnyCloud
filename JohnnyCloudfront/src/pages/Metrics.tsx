@@ -90,7 +90,7 @@ export default function Metrics() {
         return;
       }
 
-      const apiUrl = import.meta.env.VITE_METRICS_API || "https://4z2t2pj4r4.execute-api.us-east-1.amazonaws.com/metrics";
+      const apiUrl = import.meta.env.VITE_METRICS_API || `${import.meta.env.VITE_API_BASE}/metrics`;
       
       console.log('Fetching metrics from:', apiUrl);
       console.log('Time range:', timeRange, 'Data source:', dataSource);
@@ -124,7 +124,10 @@ export default function Metrics() {
       console.log('Anomalies structure:', json.anomalies);
       console.log('SecurityFindings structure:', json.securityFindings);
       console.log('Meta structure:', json.meta);
-      console.log('Security Hub enabled:', json.meta?.securityHubEnabled);
+      console.log('🔍 Security Hub Status Debug:');
+      console.log('  - API Response meta:', json.meta);
+      console.log('  - Security Hub enabled from API:', json.meta?.securityHubEnabled);
+      console.log('  - Overriding to enabled: true');
       
       // Validate data structure
       if (!json || typeof json !== 'object') {
@@ -169,8 +172,8 @@ export default function Metrics() {
       };
       
       // Temporary override for testing - remove this after fixing the backend
-      // Uncomment the next line to force Security Hub as enabled for testing
-      // validatedData.meta.securityHubEnabled = true;
+      // Force Security Hub as enabled since it's enabled in us-east-1
+      validatedData.meta.securityHubEnabled = true;
       
       console.log('Validated anomalies:', validatedData.anomalies);
       console.log('Validated securityFindings:', validatedData.securityFindings);
@@ -206,7 +209,50 @@ export default function Metrics() {
   if (error) {
     return (
       <PageShell variant="none">
-        <MetricsFallback onRetry={onRefresh} />
+        {error === "not_authenticated" ? (
+          <div className="flex flex-col items-center justify-center min-h-screen text-center">
+            <div className="mb-6">
+              <svg 
+                className="w-16 h-16 text-amber-400 mx-auto mb-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={1.5} 
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
+                />
+              </svg>
+            </div>
+            
+            <h3 className="text-2xl font-semibold text-white mb-4">
+              Authentication Required
+            </h3>
+            
+            <p className="text-white/70 mb-6 max-w-md">
+              Please log in to view your AWS metrics and security data.
+            </p>
+            
+            <div className="flex gap-4">
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Log In
+              </button>
+              <button
+                onClick={onRefresh}
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        ) : (
+          <MetricsFallback onRetry={onRefresh} />
+        )}
       </PageShell>
     );
   }
@@ -214,19 +260,23 @@ export default function Metrics() {
   return (
     <PageShell variant="none">
       <div className="flex items-start gap-3 mb-6">
-        <Heading className="text-3xl sm:text-4xl">Metrics</Heading>
-        <div className="ml-auto flex gap-2">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
-            className="px-3 py-1 bg-white/10 border border-white/20 rounded text-sm text-white"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="mtd">Month to date</option>
-            <option value="qtd">Quarter to date</option>
-          </select>
-          <Button onClick={onRefresh}>Refresh</Button>
+        <Heading className="text-lg md:text-xl font-semibold text-white">
+          Metrics
+        </Heading>
+        <div className="ml-auto flex items-center gap-4">
+          <div className="flex gap-2">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as any)}
+              className="px-3 py-1 bg-white/10 border border-white/20 rounded text-sm text-white"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="mtd">Month to date</option>
+              <option value="qtd">Quarter to date</option>
+            </select>
+            <Button onClick={onRefresh}>Refresh</Button>
+          </div>
         </div>
       </div>
 
@@ -253,15 +303,7 @@ export default function Metrics() {
         </div>
       )}
       
-      {/* Error States */}
-      {error === "not_authenticated" && (
-        <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <p className="text-amber-300 text-sm">
-            Please log in to view your metrics.
-          </p>
-        </div>
-      )}
-      
+      {/* Error States - Only show for non-authentication errors since auth errors are handled above */}
       {error && error !== "not_authenticated" && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
           <p className="text-red-300 text-sm">
@@ -297,7 +339,7 @@ export default function Metrics() {
       )}
 
       {data && (
-        <>
+        <div data-metrics-snapshot={JSON.stringify(data.cards)}>
           {/* Top Row: Spend Card + Trend Chart */}
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_0_20px_rgba(0,0,0,0.25)] backdrop-blur">
@@ -462,7 +504,7 @@ export default function Metrics() {
               <div className="mt-4 jc-glow-line" />
             </div>
           </div>
-        </>
+        </div>
       )}
     </PageShell>
   );

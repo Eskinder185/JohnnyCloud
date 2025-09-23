@@ -1,4 +1,4 @@
-const CHAT_API = (import.meta.env.VITE_CHAT_API || "").replace(/\/$/, "");
+const CHAT_API = (import.meta.env.VITE_CHAT_API || `${import.meta.env.VITE_API_BASE}/chat`).replace(/\/$/, "");
 
 export type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 

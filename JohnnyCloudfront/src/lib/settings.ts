@@ -23,5 +23,5 @@ export function setSelectedVoice(voice: VoiceId) {
 }
 
 export const CHAT_API =
-  (import.meta.env.VITE_CHAT_API as string | undefined)?.replace(/\/$/, "") || "";
+  (import.meta.env.VITE_CHAT_API || `${import.meta.env.VITE_API_BASE}/chat`)?.replace(/\/$/, "") || "";
 

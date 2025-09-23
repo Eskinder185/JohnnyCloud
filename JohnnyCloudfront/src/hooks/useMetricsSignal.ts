@@ -9,8 +9,8 @@ export function useMetricsSignal() {
 
       useEffect(() => {
         const API_BASE = import.meta.env.VITE_API_BASE as string;
-        const METRICS_API = `${API_BASE}/metrics`;
-        const GUARDRAILS_API = `${API_BASE}/guardrails`;
+        const METRICS_API = import.meta.env.VITE_METRICS_API || `${API_BASE}/metrics`;
+        const GUARDRAILS_API = import.meta.env.VITE_GUARDRAILS_API || `${API_BASE}/guardrails`;
 
         console.log('🌊 useMetricsSignal: Starting with APIs:', { API_BASE, METRICS_API, GUARDRAILS_API });
 

@@ -36,7 +36,7 @@ export interface EvidenceResponse {
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE;
-const API = `${API_BASE}/guardrails`;
+const API = import.meta.env.VITE_GUARDRAILS_API || `${API_BASE}/guardrails`;
 
 const mock: GuardrailsSummary = {
   framework: "CIS",

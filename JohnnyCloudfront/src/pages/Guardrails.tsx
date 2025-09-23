@@ -9,7 +9,6 @@ import SeverityBadge from "@/components/SeverityBadge";
 import BulkRemediationPreview from "@/components/BulkRemediationPreview";
 import ComplianceTrendChart from "@/components/charts/ComplianceTrendChart";
 import ComplianceChecklist from "@/components/ComplianceChecklist";
-import AskJohnnyCloudVoice from "@/components/AskJohnnyCloudVoice";
 
 export default function GuardrailsPage() {
   const [framework, setFramework] = useState<Framework>("CIS");
@@ -219,8 +218,8 @@ export default function GuardrailsPage() {
       <Card className="p-6">
         <header className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold mb-2 jc-title-gradient">Compliance & Guardrails</h1>
-            <p className="text-jc-dim text-sm">
+            <h1 className="text-lg md:text-xl font-semibold mb-2 jc-title-gradient">Compliance & Guardrails</h1>
+            <p className="text-sm md:text-base text-white/75 leading-relaxed">
               Monitor compliance across security frameworks and manage remediation actions
             </p>
           </div>
@@ -240,13 +239,6 @@ export default function GuardrailsPage() {
                 <option value="PCI">PCI</option>
               </select>
             </div>
-            
-            {/* Voice Assistant */}
-            <AskJohnnyCloudVoice
-              askEndpoint={`${import.meta.env.VITE_API_BASE}/chat`}
-              context={{ page: "guardrails", framework }}
-              onSent={(q, a) => console.log("Guardrails Q/A:", q, a)}
-            />
           </div>
         </header>
 
@@ -265,7 +257,7 @@ export default function GuardrailsPage() {
       </Card>
 
       {data && (
-        <>
+        <div data-guardrails-summary={JSON.stringify(data)}>
           {/* Summary Cards */}
           <div className="grid md:grid-cols-4 gap-4">
             <Card className="p-6">
@@ -575,10 +567,11 @@ export default function GuardrailsPage() {
               </div>
             )}
           </Card>
-        </>
+        </div>
       )}
 
       {/* Bulk Remediation Preview Modal */}
+
       <BulkRemediationPreview
         isOpen={showBulkPreview}
         onClose={() => setShowBulkPreview(false)}

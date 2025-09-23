@@ -35,7 +35,16 @@ export async function handleLogin() {
   const domain   = (import.meta.env.VITE_COGNITO_DOMAIN as string) || "us-east-1csm5oddde.auth.us-east-1.amazoncognito.com";
   const clientId = (import.meta.env.VITE_COGNITO_CLIENT_ID as string) || "4oc76981p9te4uegc85r0mnjg7";
   const scopes   = ((import.meta.env.VITE_SCOPES as string) || "openid email").split(/\s+/).join("+");
-  const redirect = (import.meta.env.VITE_REDIRECT_URI as string) || "https://d1zhi8uis2cnfs.cloudfront.net/auth/callback";
+  // Use localhost for local development, CloudFront for production
+  const redirect = (import.meta.env.VITE_REDIRECT_URI as string) || 
+    (window.location.hostname === 'localhost' 
+      ? `${window.location.origin}/auth/callback`
+      : "https://d1zhi8uis2cnfs.cloudfront.net/auth/callback");
+
+  console.log("🔐 handleLogin: Starting authentication");
+  console.log("🔐 handleLogin: Domain:", domain);
+  console.log("🔐 handleLogin: Client ID:", clientId);
+  console.log("🔐 handleLogin: Redirect URI:", redirect);
 
   // --- PKCE ---
   const verifier = randomVerifier(64);
@@ -54,6 +63,7 @@ export async function handleLogin() {
     `&code_challenge=${encodeURIComponent(challenge)}` +
     `&code_challenge_method=S256`;
 
+  console.log("🔐 handleLogin: Redirecting to Cognito:", url);
   window.location.href = url;
 }
 

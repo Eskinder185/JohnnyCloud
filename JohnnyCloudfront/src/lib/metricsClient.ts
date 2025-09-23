@@ -1,5 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE;
-const URL = `${API_BASE}/metrics`;
+const URL = import.meta.env.VITE_METRICS_API || `${API_BASE}/metrics`;
 
 export interface MetricsData {
   cost: any;

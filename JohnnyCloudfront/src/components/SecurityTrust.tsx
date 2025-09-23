@@ -60,7 +60,7 @@ export default function SecurityTrust() {
           
           <div className="mt-6 pt-4 border-t border-white/20">
             <a
-              href="#"
+              href="/security-whitepaper"
               onClick={handleWhitepaperClick}
               className="inline-flex items-center gap-2 text-sm text-cyan-300 hover:text-cyan-200 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-transparent rounded"
               target="_blank"
@@ -69,7 +69,7 @@ export default function SecurityTrust() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
-              View Security Whitepaper
+              View Security White Paper
             </a>
           </div>
         </div>

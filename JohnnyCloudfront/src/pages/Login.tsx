@@ -1,5 +1,6 @@
 import { ShieldCheck, LockKeyhole, Cloud, ArrowRight } from "lucide-react";
 import { handleLogin } from "@/lib/auth";
+import BackgroundManager from "@/components/background/BackgroundManager";
 
 export default function Login() {
   const onSignIn = () => {
@@ -7,7 +8,11 @@ export default function Login() {
   };
 
   return (
-    <main className="relative min-h-[calc(100vh-64px)] text-slate-100">
+    <div className="min-h-dvh relative">
+      {/* Background System */}
+      <BackgroundManager />
+      
+      <main className="relative min-h-[calc(100vh-64px)] text-slate-100">
 
       <section className="mx-auto max-w-7xl px-6 pb-16 pt-12 md:pt-20">
         {/* Heading + blurb */}
@@ -125,6 +130,7 @@ export default function Login() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </div>
   );
 }

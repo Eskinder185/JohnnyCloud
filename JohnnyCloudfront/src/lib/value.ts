@@ -15,9 +15,9 @@ export type OptimizeSnapshot = {
 };
 
 // ---- envs
-const GUARD_API = import.meta.env.VITE_GUARDRAILS_API?.replace('<your-api>', '4z2t2pj4r4.execute-api.us-east-1.amazonaws.com')?.trim();
-const OPT_API    = import.meta.env.VITE_OPTIMIZE_API?.trim();
-const METRICS_API= import.meta.env.VITE_METRICS_API?.trim();
+const GUARD_API = import.meta.env.VITE_GUARDRAILS_API || `${import.meta.env.VITE_API_BASE}/guardrails`;
+const OPT_API    = import.meta.env.VITE_OPTIMIZE_API || `${import.meta.env.VITE_API_BASE}/optimize`;
+const METRICS_API= import.meta.env.VITE_METRICS_API || `${import.meta.env.VITE_API_BASE}/metrics`;
 
 // ---- utils
 async function fetchJson(url: string, init?: RequestInit, timeoutMs = 12000) {

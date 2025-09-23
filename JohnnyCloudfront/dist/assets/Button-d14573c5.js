@@ -1,0 +1,1 @@
+import{j as r}from"./index-e9d8c211.js";function l({children:o,onClick:n,disabled:t=!1,className:s="",type:u="button",variant:a="default"}){const e=a==="outline"?"jc-btn-outline":"jc-btn";return r.jsx("button",{type:u,onClick:n,disabled:t,className:`${e} ${s} ${t?"opacity-50 cursor-not-allowed":""}`,children:o})}export{l as B};

@@ -1,5 +1,5 @@
 // src/pages/About.tsx
-import { Suspense, lazy } from "react";
+import React, { Suspense, lazy } from "react";
 import { useReveal } from "@/components/useReveal";
 import { TEAM_MEMBERS } from "@/data/team";
 
@@ -18,9 +18,12 @@ console.log('🖼️ About Page Image Path:', HERO);
 console.log('🖼️ Environment Variable:', import.meta.env.VITE_ABOUT_HERO_IMAGE);
 
 /* Small card wrapper matching your style */
-const Card = ({ children, className = "" }: any) => (
-  <div className={`rounded-2xl border bg-white/5 p-5 ${className}`}>{children}</div>
+const Card = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+  ({ children, className = "" }, ref) => (
+    <div ref={ref} className={`rounded-2xl border bg-white/5 p-5 ${className}`}>{children}</div>
+  )
 );
+Card.displayName = 'Card';
 
 export default function AboutPage() {
   const heroRef   = useReveal<HTMLImageElement>("reveal-right", 80);
@@ -63,10 +66,10 @@ export default function AboutPage() {
             ref={heroRef}
             src={HERO}
             alt="JohnnyCloud team working on AWS solutions"
-            className="absolute inset-0 h-full w-full object-cover brightness-[0.65] contrast-110 float-slow"
+            className="absolute inset-0 h-full w-full object-cover brightness-110 contrast-110 float-slow"
           />
           {/* Gradient overlay for better text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/5"></div>
           
           {/* Optional overlay content - uncomment if you want text on the image */}
           {/* <div className="absolute inset-0 flex items-end p-6">

@@ -12,6 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-lex-runtime-v2": "^3.888.0",
     "@aws-sdk/credential-providers": "^3.888.0",
+    "aws-amplify": "^6.15.6",
     "aws4fetch": "^1.0.20",
     "framer-motion": "^10.18.0",
     "lucide-react": "^0.544.0",

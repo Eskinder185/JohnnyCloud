@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: JohnnyCloud SNS + Lambda (email-only)
+
+Parameters:
+  TopicName:
+    Type: String
+    Default: JohnnyCloudAlerts
+
+Resources:
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref TopicName
+
+  AlertsTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [ !Ref AlertsTopic ]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # allow EventBridge or other AWS services later if needed
+          - Sid: AllowOrgServices
+            Effect: Allow
+            Principal: { Service: "events.amazonaws.com" }
+            Action: "sns:Publish"
+            Resource: !Ref AlertsTopic
+
+  ApiLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AlertsPublishAndSubscribe
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref AlertsTopic
+              - Effect: Allow
+                Action:
+                  - sns:Subscribe
+                  - sns:ListSubscriptionsByTopic
+                  - sns:Unsubscribe
+                Resource: !Ref AlertsTopic
+
+  # Optional table to remember user → email → subscriptionArn
+  AlertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      TableName: JohnnyCloud_Alerts
+
+Outputs:
+  AlertsTopicArn:
+    Value: !Ref AlertsTopic

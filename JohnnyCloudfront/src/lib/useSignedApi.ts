@@ -3,7 +3,7 @@ import { getAwsCreds } from "@/lib/creds";
 import { signedFetch } from "@/lib/signedFetch";
 
 const API_BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
-const API = `${API_BASE}/metrics`;
+const API = import.meta.env.VITE_METRICS_API || `${API_BASE}/metrics`;
 
 export function useSignedGet<T>(path: string) {
   const [data, setData] = React.useState<T | null>(null);

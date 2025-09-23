@@ -1,4 +1,4 @@
-import { BarChart3, DollarSign, Shield } from 'lucide-react';
+import { BarChart3, Cloud, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Feature {
@@ -28,11 +28,11 @@ const FEATURES: Feature[] = [
     tileClass: "tile-guardrails"
   },
   {
-    icon: <DollarSign className="w-5 h-5" />,
-    title: "Cost Optimization",
-    description: "Rightsizing, idle schedules, and Savings Plans with $ estimates.",
-    route: "/optimization",
-    ariaLabel: "Open Cost Optimization",
+    icon: <Cloud className="w-5 h-5" />,
+    title: "Why AWS",
+    description: "Discover the benefits and business case for AWS cloud migration.",
+    route: "/why-aws",
+    ariaLabel: "Open Why AWS",
     tileClass: "tile-cost"
   }
 ];
